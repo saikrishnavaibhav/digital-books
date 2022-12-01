@@ -1,4 +1,4 @@
-package com.digitalbooks.securityconfig;
+package com.digitalbooks.jwt;
 
 import java.io.IOException;
 
