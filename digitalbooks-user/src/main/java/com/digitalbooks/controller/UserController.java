@@ -53,21 +53,27 @@ public class UserController {
 	
 	@PostMapping("/sign-up")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-		if (userRepository.existsByUserName(signUpRequest.getUsername())) {
+		if (userRepository.existsByUserName(signUpRequest.getUserName())) {
 			return ResponseEntity
 					.badRequest()
-					.body(new MessageResponse("Error: Username is already taken!"));
+					.body(new MessageResponse("Error: UserName is already taken!"));
 		}
 
-		if (userRepository.existsByEmailId(signUpRequest.getEmail())) {
+		if (userRepository.existsByEmailId(signUpRequest.getEmailId())) {
 			return ResponseEntity
 					.badRequest()
-					.body(new MessageResponse("Error: Email is already in use!"));
+					.body(new MessageResponse("Error: EmailId is already in use!"));
 		}
 
-		User user = new User(signUpRequest.getUsername(), 
+		if (userRepository.existsByPhoneNumber(signUpRequest.getPhoneNumber())) {
+			return ResponseEntity
+					.badRequest()
+					.body(new MessageResponse("Error: PhoneNumber is already in use!"));
+		}
+		
+		User user = new User(signUpRequest.getUserName(), 
 							 encoder.encode(signUpRequest.getPassword()),
-									 signUpRequest.getEmail(), signUpRequest.getPhoneNumber());
+									 signUpRequest.getEmailId(), signUpRequest.getPhoneNumber());
 
 		Set<String> strRoles = signUpRequest.getRole();
 		Set<Role> roles = new HashSet<>();

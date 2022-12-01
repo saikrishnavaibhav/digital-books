@@ -98,13 +98,24 @@ public class UserDetailsImpl implements UserDetails {
 		return true;
 	}
 
+	
+	
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
+	public int hashCode() {
+		return Objects.hash(authorities, email, id, password, phoneNumber, username);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		if (o == null || getClass() != o.getClass())
+		if (obj == null)
 			return false;
-		UserDetailsImpl user = (UserDetailsImpl) o;
-		return Objects.equals(id, user.id);
+		if (getClass() != obj.getClass())
+			return false;
+		UserDetailsImpl other = (UserDetailsImpl) obj;
+		return Objects.equals(authorities, other.authorities) && Objects.equals(email, other.email)
+				&& Objects.equals(id, other.id) && Objects.equals(password, other.password)
+				&& Objects.equals(phoneNumber, other.phoneNumber) && Objects.equals(username, other.username);
 	}
 }

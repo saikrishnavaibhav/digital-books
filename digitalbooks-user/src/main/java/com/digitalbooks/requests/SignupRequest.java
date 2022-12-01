@@ -10,12 +10,12 @@ import com.digitalbooks.entities.Role;
 public class SignupRequest {
     @NotBlank
     @Size(min = 3, max = 20)
-    private String username;
+    private String userName;
  
     @NotBlank
     @Size(max = 50)
     @Email
-    private String email;
+    private String emailId;
     
     private Set<String> role;
     
@@ -26,24 +26,24 @@ public class SignupRequest {
     @NotBlank
     @Size(min = 10, max = 10)
     private String phoneNumber;    
-  
-    public String getUsername() {
-        return username;
-    }
  
-    public void setUsername(String username) {
-        this.username = username;
-    }
- 
-    public String getEmail() {
-        return email;
-    }
- 
-    public void setEmail(String email) {
-        this.email = email;
-    }
- 
-    public String getPassword() {
+    public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public String getEmailId() {
+		return emailId;
+	}
+
+	public void setEmailId(String emailId) {
+		this.emailId = emailId;
+	}
+
+	public String getPassword() {
         return password;
     }
  

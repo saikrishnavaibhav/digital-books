@@ -8,10 +8,10 @@
 		<relativePath />
 	</parent>
 	<groupId>com.digitalbooks</groupId>
-	<artifactId>digitalbooks-user</artifactId>
+	<artifactId>user-service</artifactId>
 	<version>1</version>
-	<name>digitalbooks-user</name>
-	<description>Digital books user project</description>
+	<name>user-service</name>
+	<description>user-service for digital books project</description>
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>
