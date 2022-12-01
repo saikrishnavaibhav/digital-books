@@ -22,8 +22,10 @@ import com.digitalbooks.userdetails.UserDetailsServiceImpl;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(
-		prePostEnabled = true)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+		prePostEnabled = true
+		//,securedEnabled = true, jsr250Enabled = true
+		)
+public class WebSecurityConfig {
 
 	@Autowired
 	private AuthEntryPointJwt unauthorizedHandler;
@@ -36,46 +38,34 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		return new AuthTokenFilter();
 	}
 	
-	@Override
-	public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-		authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+	@Bean
+	public AuthenticationManager authManager(HttpSecurity http, BCryptPasswordEncoder bCryptPasswordEncoder) 
+	  throws Exception {
+	    return http.getSharedObject(AuthenticationManagerBuilder.class)
+	      .userDetailsService(userDetailsService)
+	      .passwordEncoder(bCryptPasswordEncoder)
+	      .and()
+	      .build();
 	}
 
-	@Bean
-	@Override
-	public AuthenticationManager authenticationManagerBean() throws Exception {
-		return super.authenticationManagerBean();
-	}
-	
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 	
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
+	@Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		
 		http.cors().and().csrf().disable()
-			.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-			.authorizeRequests().antMatchers("/api/v1/digitalbooks/**").permitAll()
-			.anyRequest().authenticated();
-
+		.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+		.authorizeRequests().antMatchers("/api/v1/digitalbooks/**").permitAll()
+		.anyRequest().authenticated();
+		
 		http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+		return http.build();
+		
 	}
-	
-//	@Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//		
-//		http.cors().and().csrf().disable()
-//		.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-//		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-//		.authorizeRequests().antMatchers("/api/v1/digitalbooks/**").permitAll()
-//		.anyRequest().authenticated();
-//
-//		http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-//		return http.build();
-//		
-//	}
 
 }
 
