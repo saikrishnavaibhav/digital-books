@@ -8,17 +8,22 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
+import com.digitalbooks.entities.Book;
 import com.digitalbooks.entities.Role;
 import com.digitalbooks.entities.Roles;
 import com.digitalbooks.entities.User;
@@ -27,6 +32,7 @@ import com.digitalbooks.repositories.RoleRepository;
 import com.digitalbooks.repositories.UserRepository;
 import com.digitalbooks.requests.LoginRequest;
 import com.digitalbooks.requests.SignupRequest;
+import com.digitalbooks.responses.ErrorResponse;
 import com.digitalbooks.responses.JwtResponse;
 import com.digitalbooks.responses.MessageResponse;
 import com.digitalbooks.userdetails.UserDetailsImpl;
@@ -34,6 +40,7 @@ import com.digitalbooks.userdetails.UserDetailsImpl;
 @RestController
 //@CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/api/v1/digitalbooks")
+@RefreshScope
 public class UserController {
 	
 	@Autowired
@@ -127,4 +134,21 @@ public class UserController {
 												 roles));
 	}
 	
+	@PostMapping("/author/{author-id}/books")
+	public ResponseEntity<?> createABook(@Valid @RequestBody Book book, @PathVariable("author-id") int id) {
+		if (ObjectUtils.isEmpty(id))
+			return ResponseEntity.badRequest().body(new MessageResponse("Author id is not valid"));
+		String uri = "http://localhost:8082/api/v1/digitalbooks/author/" + id + "/createBook";
+
+		RestTemplate restTemplate = new RestTemplate();
+		try {
+			MessageResponse result = restTemplate.postForObject(uri,book, MessageResponse.class);
+			return ResponseEntity.ok(result);
+		} catch (Exception exception) {
+			return ResponseEntity.internalServerError()
+					.body(new ErrorResponse(exception.getMessage(), exception.getCause()));
+		}
+
+	}
+
 }
