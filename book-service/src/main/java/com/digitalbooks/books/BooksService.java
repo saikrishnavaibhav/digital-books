@@ -1,5 +1,8 @@
 package com.digitalbooks.books;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.digitalbooks.entities.Book;
@@ -26,4 +29,17 @@ public class BooksService {
 		return new MessageResponse("Book added successfully!");
 	}
 	
+	public List<Book> getBooks(){
+		List<Book> books = bookRespository.findAll();
+		return books;
+	}
+	
+	
+	public Book getSubscribedBook(Long bookId) {
+		
+		Optional<Book> book = bookRespository.findById(bookId);
+		if(book.isPresent())
+			return book.get();
+		return null;
+	}
 }

@@ -1,7 +1,5 @@
 package com.digitalbooks.entities;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Objects;
 import javax.persistence.Entity;
@@ -19,7 +17,7 @@ public class Book {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	int id;
+	Long id;
 	
 	@NotBlank
 	private String logo;
@@ -51,11 +49,11 @@ public class Book {
 	
 	private boolean active;
 
-	public int getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 	
