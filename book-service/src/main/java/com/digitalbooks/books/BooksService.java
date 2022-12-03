@@ -1,10 +1,13 @@
 package com.digitalbooks.books;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.digitalbooks.entities.Book;
 import com.digitalbooks.repositories.BookRespository;
 import com.digitalbooks.responses.MessageResponse;
@@ -41,5 +44,15 @@ public class BooksService {
 		if(book.isPresent())
 			return book.get();
 		return null;
+	}
+	
+	public List<Book> getAllSubscribedBooks(List<Long> bookIds){
+		
+		List<Book> booksList = new ArrayList<>();
+		List<Book> allSubscribedBooks  = bookRespository.findAllById(bookIds);
+		booksList = allSubscribedBooks.stream().filter(Book::getActive).collect(Collectors.toList());
+			
+		return booksList;
+		
 	}
 }

@@ -56,4 +56,16 @@ public class BooksController {
 			return ResponseEntity.badRequest().body(new MessageResponse("Book not found!"));
 		return ResponseEntity.ok(book);
 	}
+	
+	/*
+	 * get all subscribed books of user 
+	 */
+	@PostMapping("/book/getSubscribedBooks")
+	public ResponseEntity<?> getAllSubscribedBooks(@RequestBody List<Long> bookIds){
+		
+		List<Book> book = booksService.getAllSubscribedBooks(bookIds);
+		if(book.isEmpty())
+			return ResponseEntity.badRequest().body(new MessageResponse("User not subscribed to any book"));
+		return ResponseEntity.ok(book);
+	}
 }

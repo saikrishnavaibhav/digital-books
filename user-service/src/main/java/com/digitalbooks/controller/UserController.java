@@ -191,14 +191,13 @@ public class UserController {
 	 */
 	@GetMapping("/readers/{user-id}/books/{subscription-id}")
 	@PreAuthorize("hasRole('READER')")
-	public ResponseEntity<?> fetchAllSubscribedBooks(@PathVariable("user-id") Long userId, @PathVariable("subscription-id") Long subscriptionId) {
+	public ResponseEntity<?> fetchSubscribedBook(@PathVariable("user-id") Long userId, @PathVariable("subscription-id") Long subscriptionId) {
 		if (ObjectUtils.isEmpty(userId) || !userRepository.existsById(userId))
 			return ResponseEntity.badRequest().body(new MessageResponse("userId is not valid"));
 		if (ObjectUtils.isEmpty(subscriptionId) || !subscriptionRepository.existsById(subscriptionId))
 			return ResponseEntity.badRequest().body(new MessageResponse("subscriptionId is not valid"));
 
-		Subscription subscription = userService.verifyUserAndSubscription(userId, subscriptionId);
-		System.out.println(subscription);
+		Subscription subscription = userService.getSubscription(userId, subscriptionId);
 		if(subscription != null && !ObjectUtils.isEmpty(subscription.getBookId())) {
 			String uri = bookServiceHost + "/book/" + subscription.getBookId() + "/getSubscribedBook";
 			
@@ -210,4 +209,28 @@ public class UserController {
 		return ResponseEntity.badRequest().body(new MessageResponse("invalid request"));
 	}
 	
+	/*
+	 * Reader can fetch all his subscribed books
+	 */
+	@GetMapping("/readers/{user-id}/books")
+	@PreAuthorize("hasRole('READER')")
+	public ResponseEntity<?> fetchSubscribedBook(@PathVariable("user-id") Long userId) {
+		if (ObjectUtils.isEmpty(userId) || !userRepository.existsById(userId))
+			return ResponseEntity.badRequest().body(new MessageResponse("userId is not valid"));
+		
+		Set<Subscription> subscriptionsList = userService.getSubscriptions(userId);
+		System.out.println(subscriptionsList);
+		if(!subscriptionsList.isEmpty()) {
+			
+			List<Long> bookIds = subscriptionsList.stream().map(sub -> sub.getBookId()).collect(Collectors.toList());
+			
+			String uri = bookServiceHost + "/book/getSubscribedBooks";
+			
+			restTemplate = new RestTemplate();
+			ResponseEntity<?> result = restTemplate.postForEntity(uri, bookIds, List.class);
+			return ResponseEntity.ok(result.getBody());
+		}
+		
+		return ResponseEntity.badRequest().body(new MessageResponse("invalid request"));
+	}
 }

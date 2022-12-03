@@ -1,6 +1,8 @@
 package com.digitalbooks.userdetails;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,23 +21,30 @@ public class UserService {
 	@Autowired
 	SubscriptionRepository subscriptionRepository;
 
-	public Subscription verifyUserAndSubscription(Long userId, Long subscriptionId) {
-		Optional<User> isUserAvailable = userRepository.findById(userId);
+	public Subscription getSubscription(Long userId, Long subscriptionId) {
 
-		if (isUserAvailable.isPresent()) {
-			User user = isUserAvailable.get();
-			Subscription subscription = user.getSubscriptions().stream()
-					.filter(sub -> sub.getId().equals(subscriptionId)).findAny().orElse(null);
-			if (subscription != null) {
-				return subscription;
-			} else {
-				System.out.println("subscription not available");
-			}
-		} else {
-			System.out.println("user not available");
+		Subscription subscription = getSubscriptions(userId).stream().filter(sub -> sub.getId().equals(subscriptionId))
+				.findAny().orElse(null);
+		if (subscription != null) {
+			return subscription;
 		}
-		
+
 		return null;
 	}
 	
+	public Set<Subscription> getSubscriptions(Long userId) {
+		
+		Set<Subscription> subscriptionsList = new HashSet<>();
+		User user = verifyAndGetUser(userId);
+		if(user != null)
+			subscriptionsList = user.getSubscriptions();
+
+		return subscriptionsList;
+	}
+
+	public User verifyAndGetUser(Long userId) {
+		Optional<User> isUserAvailable = userRepository.findById(userId);
+
+		return isUserAvailable.isPresent() ? isUserAvailable.get() : null;
+	}
 }
