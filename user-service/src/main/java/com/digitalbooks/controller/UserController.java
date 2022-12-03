@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
+
 import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,6 +41,7 @@ import com.digitalbooks.requests.SignupRequest;
 import com.digitalbooks.responses.JwtResponse;
 import com.digitalbooks.responses.MessageResponse;
 import com.digitalbooks.userdetails.UserDetailsImpl;
+import com.digitalbooks.userdetails.UserService;
 
 @RestController
 //@CrossOrigin(origins = "*", maxAge = 3600)
@@ -62,6 +66,14 @@ public class UserController {
 	
 	@Autowired
 	JwtUtils jwtUtils;
+	
+	@Autowired
+	UserService userService;
+	
+	@Value("${bookservice.host}")
+	private String bookServiceHost;
+	
+	RestTemplate restTemplate;
 	
 	@PostMapping("/sign-up")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
@@ -146,7 +158,7 @@ public class UserController {
 	public ResponseEntity<?> createABook(@Valid @RequestBody Book book, @PathVariable("author-id") int id) {
 		if (ObjectUtils.isEmpty(id))
 			return ResponseEntity.badRequest().body(new MessageResponse("Author id is not valid"));
-		String uri = "http://localhost:8082/api/v1/digitalbooks/author/" + id + "/createBook";
+		String uri = bookServiceHost + "/author/" + id + "/createBook";
 
 		RestTemplate restTemplate = new RestTemplate();
 
@@ -154,9 +166,12 @@ public class UserController {
 		return ResponseEntity.ok(result);
 	}
 	
+	/*
+	 * Reader can subscribe to a book
+	 */
 	@PostMapping("/{book-id}/subscribe")
 	@PreAuthorize("hasRole('READER')")
-	public ResponseEntity<?> subscribeABook(HttpServletRequest httpRequest, @RequestBody Subscription subscription,
+	public ResponseEntity<?> subscribeABook(@RequestBody Subscription subscription,
 			@PathVariable("book-id") int bookId) {
 		if (ObjectUtils.isEmpty(bookId))
 			return ResponseEntity.badRequest().body(new MessageResponse("bookId is not valid"));
@@ -168,7 +183,31 @@ public class UserController {
 			subscriptions.add(subscription);
 			return ResponseEntity.ok(userRepository.save(user));
 		}
-		return ResponseEntity.badRequest().body(new MessageResponse("user nor found"));
+		return ResponseEntity.badRequest().body(new MessageResponse("user not found"));
+	}
+	
+	/*
+	 * Reader can fetch a subscribed book
+	 */
+	@GetMapping("/readers/{user-id}/books/{subscription-id}")
+	@PreAuthorize("hasRole('READER')")
+	public ResponseEntity<?> fetchAllSubscribedBooks(@PathVariable("user-id") Long userId, @PathVariable("subscription-id") Long subscriptionId) {
+		if (ObjectUtils.isEmpty(userId) || !userRepository.existsById(userId))
+			return ResponseEntity.badRequest().body(new MessageResponse("userId is not valid"));
+		if (ObjectUtils.isEmpty(subscriptionId) || !subscriptionRepository.existsById(subscriptionId))
+			return ResponseEntity.badRequest().body(new MessageResponse("subscriptionId is not valid"));
+
+		Subscription subscription = userService.verifyUserAndSubscription(userId, subscriptionId);
+		System.out.println(subscription);
+		if(subscription != null && !ObjectUtils.isEmpty(subscription.getBookId())) {
+			String uri = bookServiceHost + "/book/" + subscription.getBookId() + "/getSubscribedBook";
+			
+			restTemplate = new RestTemplate();
+			ResponseEntity<?> result = restTemplate.getForEntity(uri, Book.class);
+			return ResponseEntity.ok(result.getBody());
+		}
+		
+		return ResponseEntity.badRequest().body(new MessageResponse("invalid request"));
 	}
 	
 }
