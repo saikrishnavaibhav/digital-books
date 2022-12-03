@@ -4,15 +4,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import org.springframework.http.HttpStatus;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.HttpClientErrorException;
 
 @RestControllerAdvice
 public class RestControllerExceptionHandler {
@@ -33,13 +34,11 @@ public class RestControllerExceptionHandler {
         return errorsMap;
     }
 	
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR) 
-    @ExceptionHandler(RestClientException.class)
-    public String handleRestClientException(RestClientException exception) {
+	@ResponseStatus(HttpStatus.BAD_REQUEST) 
+    @ExceptionHandler(HttpClientErrorException.class)
+    public String handleHttpClientErrorException(HttpClientErrorException exception) {
 		log.error(exception.getMessage());
-        
-		return exception.getCause().getMessage();
-		
+        return exception.getMessage();
     }
 
 }

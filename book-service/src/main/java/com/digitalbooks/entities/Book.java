@@ -34,7 +34,7 @@ public class Book {
 	private Long price;
 	
 	//@NotBlank
-	private int authorId;
+	private Long authorId;
 	
 	@NotBlank
 	@Size(min = 3, max = 20)
@@ -89,11 +89,11 @@ public class Book {
 		this.price = value;
 	}
 
-	public int getAuthorId() {
+	public Long getAuthorId() {
 		return authorId;
 	}
 
-	public void setAuthorId(int authorId) {
+	public void setAuthorId(Long authorId) {
 		this.authorId = authorId;
 	}
 

@@ -8,6 +8,7 @@ import com.digitalbooks.entities.Book;
 @Repository
 public interface BookRespository extends JpaRepository<Book, Long>{
 
-	Boolean existsByAuthorIdAndTitle(int authorId, String title);
+	Boolean existsByAuthorIdAndTitle(Long authorId, String title);
 	
+	Boolean existsByAuthorIdAndId(Long authorId, Long id );
 }

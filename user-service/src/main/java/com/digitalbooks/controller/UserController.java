@@ -22,7 +22,9 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
@@ -75,6 +77,9 @@ public class UserController {
 	
 	RestTemplate restTemplate;
 	
+	/*
+	 * Guest can sign-up as reader or author to read or create books
+	 */
 	@PostMapping("/sign-up")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
 		if (userRepository.existsByUserName(signUpRequest.getUserName())) {
@@ -130,6 +135,9 @@ public class UserController {
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
 	}
 
+	/*
+	 * Guest can sign-in using valid credentials
+	 */
 	@PostMapping("/sign-in")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
@@ -153,9 +161,12 @@ public class UserController {
 												 userDetails.getSubscriptions()));
 	}
 	
+	/*
+	 * Author can create a book
+	 */
 	@PostMapping("/author/{author-id}/books")
 	@PreAuthorize("hasRole('AUTHOR')")
-	public ResponseEntity<?> createABook(@Valid @RequestBody Book book, @PathVariable("author-id") int id) {
+	public ResponseEntity<?> createABook(@Valid @RequestBody Book book, @PathVariable("author-id") Long id) {
 		if (ObjectUtils.isEmpty(id))
 			return ResponseEntity.badRequest().body(new MessageResponse("Author id is not valid"));
 		String uri = bookServiceHost + "/author/" + id + "/createBook";
@@ -233,4 +244,51 @@ public class UserController {
 		
 		return ResponseEntity.badRequest().body(new MessageResponse("invalid request"));
 	}
+
+	/*
+	 * Author can block a book created by him
+	 */
+	@PostMapping("/author/{author-id}/books/{book-id}")
+	@PreAuthorize("hasRole('AUTHOR')")
+	public ResponseEntity<?> blockABook(@PathVariable("author-id") int authorId, @PathVariable("book-id") int bookId, @RequestParam("block") boolean block) {
+		if (ObjectUtils.isEmpty(authorId))
+			return ResponseEntity.badRequest().body(new MessageResponse("Author id is not valid"));
+		if (ObjectUtils.isEmpty(bookId))
+			return ResponseEntity.badRequest().body(new MessageResponse("Book id is not valid"));
+		
+		String uri = bookServiceHost + "/author/" + authorId + "/blockBook/" + bookId +"?block=" + block;
+
+		RestTemplate restTemplate = new RestTemplate();
+
+		MessageResponse result = restTemplate.getForObject(uri, MessageResponse.class);
+		return getResultResponseEntity(result);
+	}
+
+
+	private ResponseEntity<?> getResultResponseEntity(MessageResponse result) {
+		if(result.getMessage().equals("Book updation failed"))
+			return ResponseEntity.badRequest().body(result);
+		return ResponseEntity.ok(result);
+	}
+
+	/*
+	 * Author can update a book created by him
+	 */
+	@PutMapping("/author/{author-id}/books/{book-id}")
+	@PreAuthorize("hasRole('AUTHOR')")
+	public ResponseEntity<?> updateABook(@RequestBody Book book, @PathVariable("author-id") Long authorId, @PathVariable("book-id") Long bookId) {
+		if (ObjectUtils.isEmpty(authorId))
+			return ResponseEntity.badRequest().body(new MessageResponse("Author id is not valid"));
+		if (ObjectUtils.isEmpty(bookId))
+			return ResponseEntity.badRequest().body(new MessageResponse("Book id is not valid"));
+		
+		String uri = bookServiceHost + "/author/" + authorId + "/updateBook/" + bookId;
+
+		RestTemplate restTemplate = new RestTemplate();
+
+		MessageResponse result = restTemplate.postForObject(uri,book, MessageResponse.class);
+		return getResultResponseEntity(result);
+	}
+
+
 }

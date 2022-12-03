@@ -18,8 +18,8 @@ public class BooksService {
 	@Autowired
 	BookRespository bookRespository;
 	
-	public MessageResponse saveBook(Book book, int authorId) {
-		System.out.println(book);
+	public MessageResponse saveBook(Book book, Long authorId) {
+		
 		try {
 			if(bookRespository.existsByAuthorIdAndTitle(authorId, book.getTitle())) {
 				return new MessageResponse("Book with same title exists!");
@@ -38,7 +38,7 @@ public class BooksService {
 	}
 	
 	
-	public Book getSubscribedBook(Long bookId) {
+	public Book getBook(Long bookId) {
 		
 		Optional<Book> book = bookRespository.findById(bookId);
 		if(book.isPresent())
@@ -54,5 +54,39 @@ public class BooksService {
 			
 		return booksList;
 		
+	}
+
+	public boolean blockBook(Long authorId, Long bookId, boolean block) {
+		if(bookRespository.existsByAuthorIdAndId(authorId, bookId)) {
+			Book book = getBook(bookId);
+			if(book.getActive() == block)
+				return false;
+			
+			book.setActive(block);
+			book = bookRespository.save(book);
+			if(book.getActive() == block) {
+				return true;
+			} else 
+				return false;
+		} else
+			return false;
+		
+	}
+
+	public boolean updateBook(Book book, Long bookId, Long authorId) {
+		if(bookRespository.existsByAuthorIdAndId(authorId, bookId)) {
+			Book existedBook = getBook(bookId);
+			existedBook.setCategory(book.getCategory());
+			existedBook.setContent(book.getContent());
+			existedBook.setPrice(book.getPrice());
+			existedBook.setPublishedDate(book.getPublishedDate());
+			existedBook.setPublisher(book.getPublisher());
+			existedBook.setTitle(book.getTitle());
+			existedBook.setLogo(book.getLogo());
+			
+			bookRespository.save(existedBook);
+			return true;
+		}
+		return false;
 	}
 }
