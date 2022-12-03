@@ -3,11 +3,13 @@ package com.digitalbooks.userdetails;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.digitalbooks.entities.Subscription;
 import com.digitalbooks.entities.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -26,15 +28,18 @@ public class UserDetailsImpl implements UserDetails {
 	private String password;
 
 	private Collection<? extends GrantedAuthority> authorities;
+	
+	private Set<Subscription> subscriptions;
 
 	public UserDetailsImpl(Long id, String username, String email, String password, String phoneNumber,
-			Collection<? extends GrantedAuthority> authorities) {
+			Collection<? extends GrantedAuthority> authorities, Set<Subscription> subscriptions) {
 		this.id = id;
 		this.username = username;
 		this.email = email;
 		this.password = password;
 		this.phoneNumber = phoneNumber;
 		this.authorities = authorities;
+		this.subscriptions = subscriptions;
 	}
 
 	public static UserDetailsImpl build(User user) {
@@ -48,7 +53,7 @@ public class UserDetailsImpl implements UserDetails {
 				user.getEmailId(),
 				user.getPassword(), 
 				user.getPhoneNumber(),
-				authorities);
+				authorities, user.getSubscriptions());
 	}
 
 	@Override
@@ -98,11 +103,17 @@ public class UserDetailsImpl implements UserDetails {
 		return true;
 	}
 
-	
-	
+	public Set<Subscription> getSubscriptions() {
+		return subscriptions;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(authorities, email, id, password, phoneNumber, username);
+		return Objects.hash(authorities, email, id, password, phoneNumber, username, subscriptions);
 	}
 
 	@Override
@@ -116,6 +127,7 @@ public class UserDetailsImpl implements UserDetails {
 		UserDetailsImpl other = (UserDetailsImpl) obj;
 		return Objects.equals(authorities, other.authorities) && Objects.equals(email, other.email)
 				&& Objects.equals(id, other.id) && Objects.equals(password, other.password)
-				&& Objects.equals(phoneNumber, other.phoneNumber) && Objects.equals(username, other.username);
+				&& Objects.equals(phoneNumber, other.phoneNumber) && Objects.equals(username, other.username)
+				&& Objects.equals(subscriptions, other.subscriptions);
 	}
 }

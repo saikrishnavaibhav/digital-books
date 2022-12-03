@@ -2,14 +2,15 @@ package com.digitalbooks.controller;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,13 +27,14 @@ import org.springframework.web.client.RestTemplate;
 import com.digitalbooks.entities.Book;
 import com.digitalbooks.entities.Role;
 import com.digitalbooks.entities.Roles;
+import com.digitalbooks.entities.Subscription;
 import com.digitalbooks.entities.User;
 import com.digitalbooks.jwt.JwtUtils;
 import com.digitalbooks.repositories.RoleRepository;
+import com.digitalbooks.repositories.SubscriptionRepository;
 import com.digitalbooks.repositories.UserRepository;
 import com.digitalbooks.requests.LoginRequest;
 import com.digitalbooks.requests.SignupRequest;
-import com.digitalbooks.responses.ErrorResponse;
 import com.digitalbooks.responses.JwtResponse;
 import com.digitalbooks.responses.MessageResponse;
 import com.digitalbooks.userdetails.UserDetailsImpl;
@@ -48,6 +50,9 @@ public class UserController {
 
 	@Autowired
 	RoleRepository roleRepository;
+	
+	@Autowired
+	SubscriptionRepository subscriptionRepository;
 	
 	@Autowired
 	PasswordEncoder encoder;
@@ -107,6 +112,7 @@ public class UserController {
 		}
 
 		user.setRoles(roles);
+		user.setSubscriptions(signUpRequest.getSubscriptions());
 		userRepository.save(user);
 
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
@@ -131,24 +137,38 @@ public class UserController {
 												 userDetails.getId(), 
 												 userDetails.getUsername(), 
 												 userDetails.getEmail(), 
-												 roles));
+												 roles,
+												 userDetails.getSubscriptions()));
 	}
 	
 	@PostMapping("/author/{author-id}/books")
+	@PreAuthorize("hasRole('AUTHOR')")
 	public ResponseEntity<?> createABook(@Valid @RequestBody Book book, @PathVariable("author-id") int id) {
 		if (ObjectUtils.isEmpty(id))
 			return ResponseEntity.badRequest().body(new MessageResponse("Author id is not valid"));
 		String uri = "http://localhost:8082/api/v1/digitalbooks/author/" + id + "/createBook";
 
 		RestTemplate restTemplate = new RestTemplate();
-		try {
-			MessageResponse result = restTemplate.postForObject(uri,book, MessageResponse.class);
-			return ResponseEntity.ok(result);
-		} catch (Exception exception) {
-			return ResponseEntity.internalServerError()
-					.body(new ErrorResponse(exception.getMessage(), exception.getCause()));
-		}
 
+		MessageResponse result = restTemplate.postForObject(uri,book, MessageResponse.class);
+		return ResponseEntity.ok(result);
 	}
+	
+	@PostMapping("/{book-id}/subscribe")
+	@PreAuthorize("hasRole('READER')")
+	public ResponseEntity<?> subscribeABook(HttpServletRequest httpRequest, @RequestBody Subscription subscription,
+			@PathVariable("book-id") int bookId) {
+		if (ObjectUtils.isEmpty(bookId))
+			return ResponseEntity.badRequest().body(new MessageResponse("bookId is not valid"));
 
+		Optional<User> isUserPresent = userRepository.findById(subscription.getUserId());
+		if (isUserPresent.isPresent()) {
+			User user = isUserPresent.get();
+			Set<Subscription> subscriptions = user.getSubscriptions();
+			subscriptions.add(subscription);
+			return ResponseEntity.ok(userRepository.save(user));
+		}
+		return ResponseEntity.badRequest().body(new MessageResponse("user nor found"));
+	}
+	
 }
