@@ -4,28 +4,33 @@ import java.util.Set;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern.Flag;
 import javax.validation.constraints.Size;
-import com.digitalbooks.entities.Role;
+
+import com.digitalbooks.entities.Subscription;
  
 public class SignupRequest {
-    @NotBlank
-    @Size(min = 3, max = 20)
+    @NotBlank(message = "userName must not be empty")
+    @Size(min = 3, max = 20, message = "length must be between 3 to 20 characters")
     private String userName;
  
-    @NotBlank
+    @NotBlank(message = "emailId must not be empty")
     @Size(max = 50)
-    @Email
+    @Email(regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}",
+            flags = Flag.CASE_INSENSITIVE, message = "please enter valid emailId")
     private String emailId;
     
     private Set<String> role;
     
-    @NotBlank
+    @NotBlank(message = "password must not be empty")
     @Size(min = 6, max = 40)
     private String password;
     
-    @NotBlank
+    @NotBlank(message = "phoneNumber must not be empty")
     @Size(min = 10, max = 10)
-    private String phoneNumber;    
+    private String phoneNumber;
+    
+    Set<Subscription> subscriptions;
  
     public String getUserName() {
 		return userName;
@@ -66,5 +71,20 @@ public class SignupRequest {
 	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
 	}
-    
+	
+	public Set<Subscription> getSubscriptions() {
+		return subscriptions;
+	}
+
+	public void setSubscriptions(Set<Subscription> subscriptions) {
+		this.subscriptions = subscriptions;
+	}
+
+	@Override
+	public String toString() {
+		return "SignupRequest [userName=" + userName + ", emailId=" + emailId + ", role=" + role + ", password="
+				+ password + ", phoneNumber=" + phoneNumber + ", subscriptions=" + subscriptions
+				+ "]";
+	}
+
 }

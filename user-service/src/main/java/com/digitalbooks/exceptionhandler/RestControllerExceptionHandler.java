@@ -12,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.RestClientException;
 
 @RestControllerAdvice
 public class RestControllerExceptionHandler {
@@ -30,6 +31,15 @@ public class RestControllerExceptionHandler {
             errorsMap.put(error.getCode(), error.getDefaultMessage());
         }
         return errorsMap;
+    }
+	
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR) 
+    @ExceptionHandler(RestClientException.class)
+    public String handleRestClientException(RestClientException exception) {
+		log.error(exception.getMessage());
+        
+		return exception.getCause().getMessage();
+		
     }
 
 }
