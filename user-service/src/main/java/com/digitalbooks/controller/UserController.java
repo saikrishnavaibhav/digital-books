@@ -264,7 +264,6 @@ public class UserController {
 		return getResultResponseEntity(result);
 	}
 
-
 	private ResponseEntity<?> getResultResponseEntity(MessageResponse result) {
 		if(result.getMessage().equals("Book updation failed"))
 			return ResponseEntity.badRequest().body(result);
@@ -290,5 +289,19 @@ public class UserController {
 		return getResultResponseEntity(result);
 	}
 
+	/*
+	 * Reader can cancel subscription before 24 hrs
+	 */
+	@PostMapping("/readers/{user-id}/books/{subscription-id}/cancel-subscription")
+	@PreAuthorize("hasRole('READER')")
+	public ResponseEntity<?> cancelSubscription(@PathVariable("user-id") Long userId, @PathVariable("subscription-id") Long subscriptionId) {
+		if (ObjectUtils.isEmpty(userId))
+			return ResponseEntity.badRequest().body(new MessageResponse("user id is not valid"));
+		if (ObjectUtils.isEmpty(subscriptionId))
+			return ResponseEntity.badRequest().body(new MessageResponse("subscription id is not valid"));
+		
+		
+		return userService.cancelSubscription(userId, subscriptionId);
+	}
 
 }
