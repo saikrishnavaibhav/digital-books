@@ -100,8 +100,9 @@ public class BooksService {
 		return new MessageResponse("Invalid Request");
 	}
 
-	public MessageResponse searchBooks(String category, String title, String author, int price, String publisher) {
-		
-		return null;
+	public List<Book> searchBooks(String category, String title, String author, Long price, String publisher) {
+		List<Book> books = bookRespository.findBooksByCategoryAndTitleAndAuthorAndPriceAndPublisher(category, title, author, price, publisher);
+		System.out.println(books);
+		return books;
 	}
 }

@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,9 +167,18 @@ public class UserController {
 	 */
 	@PostMapping("/author/{author-id}/books")
 	@PreAuthorize("hasRole('AUTHOR')")
-	public ResponseEntity<?> createABook(@Valid @RequestBody Book book, @PathVariable("author-id") Long id) {
+	public ResponseEntity<?> createABook(HttpServletRequest request, @Valid @RequestBody Book book, @PathVariable("author-id") Long id) {
 		if (ObjectUtils.isEmpty(id))
 			return ResponseEntity.badRequest().body(new MessageResponse("Author id is not valid"));
+		
+		String jwt = jwtUtils.parseJwt(request);
+		if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+			String authorName = jwtUtils.getUserNameFromJwtToken(jwt);
+			book.setAuthorName(authorName);
+		} else {
+			return ResponseEntity.badRequest().body("Invalid request");
+		}
+		
 		String uri = bookServiceHost + "/author/" + id + "/createBook";
 
 		RestTemplate restTemplate = new RestTemplate();
@@ -348,7 +358,9 @@ public class UserController {
 			
 		restTemplate = new RestTemplate();
 		ResponseEntity<?> result = restTemplate.getForEntity(uri, List.class);
-		return ResponseEntity.ok(result);
+		List<Book> books = (List<Book>) result.getBody();
+		if(books.isEmpty()) return ResponseEntity.badRequest().body(new MessageResponse("Invalid request"));
+		return ResponseEntity.ok(books);
 		
 	}
 }

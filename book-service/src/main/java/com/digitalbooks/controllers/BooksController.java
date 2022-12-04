@@ -88,8 +88,8 @@ public class BooksController {
 	 * Anyone can search books
 	 */
 	@GetMapping("/book/searchBooks")
-	public MessageResponse readBook(@RequestParam("category") String category, @RequestParam("title") String title,
-			@RequestParam("author") String author, @RequestParam("price") int price,  @RequestParam("publisher") String publisher) {
+	public List<Book> readBook(@RequestParam("category") String category, @RequestParam("title") String title,
+			@RequestParam("author") String author, @RequestParam("price") Long price,  @RequestParam("publisher") String publisher) {
 		return booksService.searchBooks(category, title, author, price, publisher);
 	}
 	

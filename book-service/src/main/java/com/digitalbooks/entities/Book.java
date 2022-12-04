@@ -38,13 +38,17 @@ public class Book {
 	
 	@NotBlank
 	@Size(min = 3, max = 20)
+	private String authorName;
+	
+	@NotBlank
+	@Size(min = 3, max = 20)
 	private String publisher;
 	
 	//@NotBlank
 	private Date publishedDate;
 	
 	@NotBlank
-	@Size(min = 50, max = 500)
+	@Size(min = 50, max = 2000)
 	private String content;
 	
 	private boolean active;
@@ -97,6 +101,14 @@ public class Book {
 		this.authorId = authorId;
 	}
 
+	public String getAuthorName() {
+		return authorName;
+	}
+
+	public void setAuthorName(String authorName) {
+		this.authorName = authorName;
+	}
+
 	public String getPublisher() {
 		return publisher;
 	}
@@ -131,7 +143,8 @@ public class Book {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(active, authorId, category, content, id, logo, price, publishedDate, publisher, title);
+		return Objects.hash(active, authorId, authorName, category, content, id, logo, price, publishedDate, publisher,
+				title);
 	}
 
 	@Override
@@ -144,8 +157,9 @@ public class Book {
 			return false;
 		Book other = (Book) obj;
 		return active == other.active && Objects.equals(authorId, other.authorId)
-				&& Objects.equals(category, other.category) && Objects.equals(content, other.content) && id == other.id
-				&& Objects.equals(logo, other.logo) && price == other.price
+				&& Objects.equals(authorName, other.authorName) && Objects.equals(category, other.category)
+				&& Objects.equals(content, other.content) && Objects.equals(id, other.id)
+				&& Objects.equals(logo, other.logo) && Objects.equals(price, other.price)
 				&& Objects.equals(publishedDate, other.publishedDate) && Objects.equals(publisher, other.publisher)
 				&& Objects.equals(title, other.title);
 	}
@@ -153,8 +167,8 @@ public class Book {
 	@Override
 	public String toString() {
 		return "Book [id=" + id + ", logo=" + logo + ", title=" + title + ", category=" + category + ", price=" + price
-				+ ", authorId=" + authorId + ", publisher=" + publisher + ", publishedDate=" + publishedDate
-				+ ", content=" + content + ", active=" + active + "]";
+				+ ", authorId=" + authorId + ", authorName=" + authorName + ", publisher=" + publisher
+				+ ", publishedDate=" + publishedDate + ", content=" + content + ", active=" + active + "]";
 	}
 
 }
