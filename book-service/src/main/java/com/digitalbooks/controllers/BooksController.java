@@ -1,9 +1,6 @@
 package com.digitalbooks.controllers;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,20 +27,6 @@ public class BooksController {
 	public ResponseEntity<?> createBook(@RequestBody Book book, @PathVariable("author-id") Long id){
 		book.setAuthorId(id);
 		return ResponseEntity.ok(booksService.saveBook(book, id));
-	}
-	
-	@GetMapping("search?category&title&author&price&publisher")
-	public ResponseEntity<?> getBooks(HttpServletRequest request){
-		
-		String uri = request.getRequestURI();
-		
-		String uriSearch = uri.split("?")[1];
-		String[] searchSplit = uriSearch.split("&");
-		
-		
-		List<Book> books = new ArrayList<>();
-		books = booksService.getBooks();
-		return ResponseEntity.ok(books);
 	}
 	
 	/*
@@ -90,4 +73,24 @@ public class BooksController {
 		}
 		return new MessageResponse("Book updation failed");
 	}
+
+	
+	/*
+	 * Reader can read his subscribed book
+	 */
+	@GetMapping("/book/{book-id}/readBook")
+	public MessageResponse readBook(@PathVariable("book-id") Long bookId) {
+		return booksService.readBook(bookId);
+	}
+	
+	
+	/*
+	 * Anyone can search books
+	 */
+	@GetMapping("/book/searchBooks")
+	public MessageResponse readBook(@RequestParam("category") String category, @RequestParam("title") String title,
+			@RequestParam("author") String author, @RequestParam("price") int price,  @RequestParam("publisher") String publisher) {
+		return booksService.searchBooks(category, title, author, price, publisher);
+	}
+	
 }

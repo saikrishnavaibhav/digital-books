@@ -304,4 +304,51 @@ public class UserController {
 		return userService.cancelSubscription(userId, subscriptionId);
 	}
 
+	/*
+	 * Reader can a read a subscribed book
+	 */
+	@GetMapping("/readers/{user-id}/books/{subscription-id}/read")
+	@PreAuthorize("hasRole('READER')")
+	public ResponseEntity<?> readBook(@PathVariable("user-id") Long userId, @PathVariable("subscription-id") Long subscriptionId) {
+		if (ObjectUtils.isEmpty(userId))
+			return ResponseEntity.badRequest().body(new MessageResponse("user id is not valid"));
+		if (ObjectUtils.isEmpty(subscriptionId))
+			return ResponseEntity.badRequest().body(new MessageResponse("subscription id is not valid"));
+		Subscription subscription = userService.getSubscription(userId, subscriptionId);
+		if(subscription != null && !ObjectUtils.isEmpty(subscription.getBookId()))
+		{
+			String uri = bookServiceHost + "/book/" + subscription.getBookId() + "/readBook";
+			
+			restTemplate = new RestTemplate();
+			MessageResponse result = restTemplate.getForObject(uri, MessageResponse.class);
+			return ResponseEntity.ok(result);
+		}
+		return ResponseEntity.badRequest().body(new MessageResponse("Invalid request"));
+		
+	}
+	
+	/*
+	 * Anyone can search books
+	 */
+	@GetMapping("/search")
+	public ResponseEntity<?> searchBooks(@RequestParam("category") String category, @RequestParam("title") String title,
+				@RequestParam("author") String author, @RequestParam("price") int price,  @RequestParam("publisher") String publisher) {
+		if (ObjectUtils.isEmpty(category))
+			return ResponseEntity.badRequest().body(new MessageResponse("category is not valid"));
+		if (ObjectUtils.isEmpty(title))
+			return ResponseEntity.badRequest().body(new MessageResponse("title is not valid"));
+		if (ObjectUtils.isEmpty(author))
+			return ResponseEntity.badRequest().body(new MessageResponse("author is not valid"));
+		if (ObjectUtils.isEmpty(publisher))
+			return ResponseEntity.badRequest().body(new MessageResponse("publisher is not valid"));
+		if (price < 0)
+			return ResponseEntity.badRequest().body(new MessageResponse("price is not valid"));
+		
+		String uri = bookServiceHost + "/book/searchBooks?category="+category+"&title="+title+"&author="+author+"&price="+price+"&publisher="+publisher;
+			
+		restTemplate = new RestTemplate();
+		ResponseEntity<?> result = restTemplate.getForEntity(uri, List.class);
+		return ResponseEntity.ok(result);
+		
+	}
 }

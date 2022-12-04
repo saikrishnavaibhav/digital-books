@@ -89,4 +89,19 @@ public class BooksService {
 		}
 		return false;
 	}
+
+	public MessageResponse readBook(Long bookId) {
+		if(bookRespository.existsById(bookId)) {
+			Book book = getBook(bookId);
+			if(book.getActive()) {
+				return new MessageResponse(book.getContent());
+			}
+		}
+		return new MessageResponse("Invalid Request");
+	}
+
+	public MessageResponse searchBooks(String category, String title, String author, int price, String publisher) {
+		
+		return null;
+	}
 }
