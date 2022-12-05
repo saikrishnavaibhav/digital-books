@@ -12,3 +12,6 @@ added validations for signup, implemented subscribe to a book/ get a subscribed 
 
 04-12-2022
 implemented cancel-subscription to a book by reader before 24 hrs, Implemented searchBooks by multiple criteria
+
+05-12-2022
+Added password validation in user-service, validations in book-service, started working on test cases for user-service
