@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.digitalbooks.entities.Book;
@@ -37,7 +38,7 @@ public class BooksService {
 		return books;
 	}
 	
-	
+	@Cacheable
 	public Book getBook(Long bookId) {
 		
 		Optional<Book> book = bookRespository.findById(bookId);
