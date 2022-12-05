@@ -40,5 +40,12 @@ public class RestControllerExceptionHandler {
 		log.error(exception.getMessage());
         return exception.getMessage();
     }
+	
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR) 
+    @ExceptionHandler(Exception.class)
+    public String handleAnyException(Exception exception) {
+		log.error(exception.getMessage());
+        return exception.getMessage();
+    }
 
 }

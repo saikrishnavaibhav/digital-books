@@ -8,6 +8,7 @@ import javax.validation.constraints.Pattern.Flag;
 import javax.validation.constraints.Size;
 
 import com.digitalbooks.entities.Subscription;
+import com.digitalbooks.validations.ValidPassword;
  
 public class SignupRequest {
     @NotBlank(message = "userName must not be empty")
@@ -22,8 +23,7 @@ public class SignupRequest {
     
     private Set<String> role;
     
-    @NotBlank(message = "password must not be empty")
-    @Size(min = 6, max = 40)
+    @ValidPassword
     private String password;
     
     @NotBlank(message = "phoneNumber must not be empty")

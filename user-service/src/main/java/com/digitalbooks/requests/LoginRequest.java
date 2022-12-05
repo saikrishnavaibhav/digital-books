@@ -3,10 +3,11 @@ package com.digitalbooks.requests;
 import javax.validation.constraints.NotBlank;
 
 public class LoginRequest {
-	@NotBlank
+	
+	@NotBlank(message = "Enter valid userName")
 	private String userName;
 
-	@NotBlank
+	@NotBlank(message = "Enter valid password")
 	private String password;
 
 	public String getUserName() {

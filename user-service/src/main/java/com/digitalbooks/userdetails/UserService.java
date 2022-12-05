@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,7 @@ public class UserService {
 	@Autowired
 	SubscriptionRepository subscriptionRepository;
 
+	@Cacheable("books")
 	public Subscription getSubscription(Long userId, Long subscriptionId) {
 
 		Subscription subscription = getSubscriptions(userId).stream().filter(sub -> sub.getId().equals(subscriptionId))
