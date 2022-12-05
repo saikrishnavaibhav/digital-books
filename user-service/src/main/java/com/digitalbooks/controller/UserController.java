@@ -1,5 +1,6 @@
 package com.digitalbooks.controller;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -29,8 +30,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.digitalbooks.entities.Book;
 import com.digitalbooks.entities.Role;
 import com.digitalbooks.entities.Roles;
 import com.digitalbooks.entities.Subscription;
@@ -39,12 +40,15 @@ import com.digitalbooks.jwt.JwtUtils;
 import com.digitalbooks.repositories.RoleRepository;
 import com.digitalbooks.repositories.SubscriptionRepository;
 import com.digitalbooks.repositories.UserRepository;
+import com.digitalbooks.requests.Book;
 import com.digitalbooks.requests.LoginRequest;
 import com.digitalbooks.requests.SignupRequest;
+import com.digitalbooks.responses.BookResponse;
 import com.digitalbooks.responses.JwtResponse;
 import com.digitalbooks.responses.MessageResponse;
 import com.digitalbooks.userdetails.UserDetailsImpl;
 import com.digitalbooks.userdetails.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 //@CrossOrigin(origins = "*", maxAge = 3600)
@@ -77,6 +81,9 @@ public class UserController {
 	private String bookServiceHost;
 	
 	RestTemplate restTemplate;
+	
+	@Autowired
+	ObjectMapper objectMapper;
 	
 	/*
 	 * Guest can sign-up as reader or author to read or create books
@@ -167,9 +174,17 @@ public class UserController {
 	 */
 	@PostMapping("/author/{author-id}/books")
 	@PreAuthorize("hasRole('AUTHOR')")
-	public ResponseEntity<?> createABook(HttpServletRequest request, @Valid @RequestBody Book book, @PathVariable("author-id") Long id) {
+	public ResponseEntity<?> createABook(HttpServletRequest request, @RequestParam("logo") MultipartFile logo, @Valid @RequestParam("book") String bookJsonAsString, @PathVariable("author-id") Long id) throws IOException {
 		if (ObjectUtils.isEmpty(id))
 			return ResponseEntity.badRequest().body(new MessageResponse("Author id is not valid"));
+			
+		Book book = null;
+		book = objectMapper.readValue(bookJsonAsString, Book.class);
+		
+		if(logo != null)
+			book.setLogo(logo.getBytes());
+		else
+			return ResponseEntity.badRequest().body(new MessageResponse("Logo is not valid"));
 		
 		String jwt = jwtUtils.parseJwt(request);
 		if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
@@ -193,10 +208,11 @@ public class UserController {
 	@PostMapping("/{book-id}/subscribe")
 	@PreAuthorize("hasRole('READER')")
 	public ResponseEntity<?> subscribeABook(@RequestBody Subscription subscription,
-			@PathVariable("book-id") int bookId) {
+			@PathVariable("book-id") Long bookId) {
 		if (ObjectUtils.isEmpty(bookId))
 			return ResponseEntity.badRequest().body(new MessageResponse("bookId is not valid"));
-
+		//call book service to check if bookId is valid
+		subscription.setBookId(bookId);
 		Optional<User> isUserPresent = userRepository.findById(subscription.getUserId());
 		if (isUserPresent.isPresent()) {
 			User user = isUserPresent.get();
@@ -223,7 +239,7 @@ public class UserController {
 			String uri = bookServiceHost + "/book/" + subscription.getBookId() + "/getSubscribedBook";
 			
 			restTemplate = new RestTemplate();
-			ResponseEntity<?> result = restTemplate.getForEntity(uri, Book.class);
+			ResponseEntity<?> result = restTemplate.getForEntity(uri, BookResponse.class);
 			return ResponseEntity.ok(result.getBody());
 		}
 		
@@ -235,7 +251,7 @@ public class UserController {
 	 */
 	@GetMapping("/readers/{user-id}/books")
 	@PreAuthorize("hasRole('READER')")
-	public ResponseEntity<?> fetchSubscribedBook(@PathVariable("user-id") Long userId) {
+	public ResponseEntity<?> fetchAllSubscribedBooks(@PathVariable("user-id") Long userId) {
 		if (ObjectUtils.isEmpty(userId) || !userRepository.existsById(userId))
 			return ResponseEntity.badRequest().body(new MessageResponse("userId is not valid"));
 		
@@ -341,6 +357,7 @@ public class UserController {
 	 * Anyone can search books
 	 */
 	@GetMapping("/search")
+	@SuppressWarnings("unchecked")
 	public ResponseEntity<?> searchBooks(@RequestParam("category") String category, @RequestParam("title") String title,
 				@RequestParam("author") String author, @RequestParam("price") int price,  @RequestParam("publisher") String publisher) {
 		if (ObjectUtils.isEmpty(category))

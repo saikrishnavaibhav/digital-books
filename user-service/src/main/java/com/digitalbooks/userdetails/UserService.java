@@ -24,7 +24,7 @@ public class UserService {
 	@Autowired
 	SubscriptionRepository subscriptionRepository;
 
-	@Cacheable("books")
+	@Cacheable(value = "subscription")
 	public Subscription getSubscription(Long userId, Long subscriptionId) {
 
 		Subscription subscription = getSubscriptions(userId).stream().filter(sub -> sub.getId().equals(subscriptionId))

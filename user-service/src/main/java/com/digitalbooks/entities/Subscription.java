@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "Subscription")
@@ -17,6 +18,8 @@ public class Subscription {
 	private Long id;
 	
 	private Long bookId;
+	
+	@NotNull
 	private Long userId;
 	private boolean active = true;
 	

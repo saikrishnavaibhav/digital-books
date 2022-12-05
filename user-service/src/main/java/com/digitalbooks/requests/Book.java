@@ -1,4 +1,4 @@
-package com.digitalbooks.entities;
+package com.digitalbooks.requests;
 
 import java.util.Date;
 import java.util.Objects;
@@ -6,6 +6,7 @@ import java.util.Objects;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -16,8 +17,8 @@ public class Book {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	int id;
 	
-	@NotBlank
-	private String logo;
+	@Lob
+	private byte[] logo;
 	
 	@NotBlank
 	@Size(min = 3, max = 20)
@@ -57,12 +58,12 @@ public class Book {
 		this.id = id;
 	}
 	
-	public String getLogo() {
+	public byte[] getLogo() {
 		return logo;
 	}
 
-	public void setLogo(String value) {
-		this.logo = value;
+	public void setLogo(byte[] logo) {
+		this.logo = logo;
 	}
 
 	public String getTitle() {
@@ -80,13 +81,13 @@ public class Book {
 	public void setCategory(String value) {
 		this.category = value;
 	}
-
-	public long getPrice() {
+	
+	public Long getPrice() {
 		return price;
 	}
 
-	public void setPrice(long value) {
-		this.price = value;
+	public void setPrice(Long price) {
+		this.price = price;
 	}
 
 	public int getAuthorId() {
