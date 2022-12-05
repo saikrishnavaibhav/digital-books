@@ -38,7 +38,7 @@ public class BooksService {
 		return books;
 	}
 	
-	@Cacheable
+	@Cacheable("book")
 	public Book getBook(Long bookId) {
 		
 		Optional<Book> book = bookRespository.findById(bookId);
@@ -60,12 +60,20 @@ public class BooksService {
 	public boolean blockBook(Long authorId, Long bookId, boolean block) {
 		if(bookRespository.existsByAuthorIdAndId(authorId, bookId)) {
 			Book book = getBook(bookId);
-			if(book.getActive() == block)
+			System.out.println();
+			System.out.println("initial book: " + book);
+			System.out.println();
+			if(book.getActive() != block)
 				return false;
 			
-			book.setActive(block);
-			book = bookRespository.save(book);
-			if(book.getActive() == block) {
+			book.setActive(!block);
+			System.out.println();
+			System.out.println("mid book: " + book);
+			System.out.println();
+			
+			Book book1 = bookRespository.save(book);
+			System.out.println("final book: " + book1);
+			if(book1.getActive() != block) {
 				return true;
 			} else 
 				return false;

@@ -1,58 +1,51 @@
-package com.digitalbooks.entities;
+package com.digitalbooks.responses;
 
 import java.util.Date;
 import java.util.Objects;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
-@Entity
-@Table(name = "Book")
-public class Book {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	Long id;
-	
-	@Lob
-	private byte[] logo;
-	
-	@NotBlank
-	@Size(min = 3, max = 20)
+public class BookResponse {
+
+	private Long id;
+
+	private String logo;
+
 	private String title;
-	
-	@NotBlank
-	@Size(min = 3, max = 20)
+
 	private String category;
-	
-	@NotNull
+
 	private Long price;
-	
-	//@NotBlank
+
 	private Long authorId;
-	
-	@NotBlank
-	@Size(min = 3, max = 20)
+
 	private String authorName;
-	
-	@NotBlank
-	@Size(min = 3, max = 20)
+
 	private String publisher;
-	
-	//@NotBlank
+
 	private Date publishedDate;
-	
-	@NotBlank
-	@Size(min = 50, max = 2000)
+
 	private String content;
-	
+
 	private boolean active;
+
+	public BookResponse() {
+		
+	}
+	
+	public BookResponse(Long id, String logo, String title, String category, Long price, Long authorId, String authorName,
+			String publisher, Date publishedDate, String content, boolean active) {
+		super();
+		this.id = id;
+		this.logo = logo;
+		this.title = title;
+		this.category = category;
+		this.price = price;
+		this.authorId = authorId;
+		this.authorName = authorName;
+		this.publisher = publisher;
+		this.publishedDate = publishedDate;
+		this.content = content;
+		this.active = active;
+	}
 
 	public Long getId() {
 		return id;
@@ -61,12 +54,12 @@ public class Book {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	
-	public byte[] getLogo() {
+
+	public String getLogo() {
 		return logo;
 	}
 
-	public void setLogo(byte[] logo) {
+	public void setLogo(String logo) {
 		this.logo = logo;
 	}
 
@@ -156,10 +149,9 @@ public class Book {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Book other = (Book) obj;
-		return active == other.active && Objects.equals(authorId, other.authorId)
-				&& Objects.equals(authorName, other.authorName) && Objects.equals(category, other.category)
-				&& Objects.equals(content, other.content) && Objects.equals(id, other.id)
+		BookResponse other = (BookResponse) obj;
+		return active == other.active && authorId == other.authorId && Objects.equals(authorName, other.authorName)
+				&& Objects.equals(category, other.category) && Objects.equals(content, other.content) && id == other.id
 				&& Objects.equals(logo, other.logo) && Objects.equals(price, other.price)
 				&& Objects.equals(publishedDate, other.publishedDate) && Objects.equals(publisher, other.publisher)
 				&& Objects.equals(title, other.title);
@@ -167,8 +159,8 @@ public class Book {
 
 	@Override
 	public String toString() {
-		return "Book [id=" + id + ", logo=" + logo + ", title=" + title + ", category=" + category + ", price=" + price
-				+ ", authorId=" + authorId + ", authorName=" + authorName + ", publisher=" + publisher
+		return "BookResponse [id=" + id + ", logo=" + logo + ", title=" + title + ", category=" + category + ", price="
+				+ price + ", authorId=" + authorId + ", authorName=" + authorName + ", publisher=" + publisher
 				+ ", publishedDate=" + publishedDate + ", content=" + content + ", active=" + active + "]";
 	}
 

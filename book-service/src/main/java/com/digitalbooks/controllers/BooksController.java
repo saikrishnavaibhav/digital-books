@@ -2,6 +2,7 @@ package com.digitalbooks.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +14,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.digitalbooks.books.BooksService;
 import com.digitalbooks.entities.Book;
+import com.digitalbooks.responses.BookResponse;
 import com.digitalbooks.responses.MessageResponse;
 
 @RestController
@@ -46,7 +49,26 @@ public class BooksController {
 		Book book = booksService.getBook(bookId);
 		if(book == null || !book.getActive())
 			return ResponseEntity.badRequest().body(new MessageResponse("Book not found!"));
-		return ResponseEntity.ok(book);
+		BookResponse bookResponse = new BookResponse();
+		bookResponse.setId(book.getId());
+		bookResponse.setActive(book.getActive());
+		bookResponse.setAuthorId(book.getAuthorId());
+		bookResponse.setAuthorName(book.getAuthorName());
+		bookResponse.setCategory(book.getCategory());
+		bookResponse.setContent(book.getContent());
+		
+		String logo = ServletUriComponentsBuilder
+		          .fromCurrentContextPath()
+		          .path("/logos/")
+		          .path(""+book.getId())
+		          .toUriString();
+		
+		bookResponse.setLogo(logo);
+		bookResponse.setPrice(book.getPrice());
+		bookResponse.setPublishedDate(book.getPublishedDate());
+		bookResponse.setPublisher(book.getPublisher());
+		bookResponse.setTitle(book.getTitle());
+		return ResponseEntity.ok(bookResponse);
 	}
 	
 	/*
@@ -59,9 +81,11 @@ public class BooksController {
 		List<Book> book = booksService.getAllSubscribedBooks(bookIds);
 		if(book.isEmpty())
 			return ResponseEntity.badRequest().body(new MessageResponse("User not subscribed to any book"));
-		return ResponseEntity.ok(book);
+		List<BookResponse> bookResponses = getBookResponses(book);
+		return ResponseEntity.ok(bookResponses);
 	}
 	
+
 	/*
 	 * Author can block/unblock his book
 	 */
@@ -71,7 +95,7 @@ public class BooksController {
 			return new MessageResponse("Invalid author id");
 		if(bookId == null)
 			return new MessageResponse("Invalid book id");
-		if (booksService.blockBook(authorId, bookId, block)) return new MessageResponse("Book blocked successfully");
+		if (booksService.blockBook(authorId, bookId, block)) return new MessageResponse("Book updated successfully");
 		return new MessageResponse("Book updation failed");
 	}
 	
@@ -108,15 +132,41 @@ public class BooksController {
 	 * Anyone can search books
 	 */
 	@GetMapping("/book/searchBooks")
-	public List<Book> readBook(@RequestParam("category") String category, @RequestParam("title") String title,
+	public List<BookResponse> readBook(@RequestParam("category") String category, @RequestParam("title") String title,
 			@RequestParam("author") String author, @RequestParam("price") Long price,  @RequestParam("publisher") String publisher) {
 		
-		List<Book> booksList = new ArrayList<>();
+		List<BookResponse> booksList = new ArrayList<>();
 		if(ObjectUtils.isEmpty(category) || ObjectUtils.isEmpty(title) || ObjectUtils.isEmpty(author) || ObjectUtils.isEmpty(publisher) || price == null)
 			return booksList;
 		
-		booksList = booksService.searchBooks(category, title, author, price, publisher);
-		return booksList;
+		List<Book> books = booksService.searchBooks(category, title, author, price, publisher);
+		return getBookResponses(books);
 	}
-	
+
+	private List<BookResponse> getBookResponses(List<Book> book) {
+		List<BookResponse> bookResponses = book.stream().filter(Book::getActive).map(book1 -> {
+			BookResponse bookResponse = new BookResponse();
+			bookResponse.setId(book1.getId());
+				bookResponse.setActive(book1.getActive());
+				bookResponse.setAuthorId(book1.getAuthorId());
+				bookResponse.setAuthorName(book1.getAuthorName());
+				bookResponse.setCategory(book1.getCategory());
+				bookResponse.setContent(book1.getContent());
+				
+				String logo = ServletUriComponentsBuilder
+				          .fromCurrentContextPath()
+				          .path("/logos/")
+				          .path(""+book1.getId())
+				          .toUriString();
+				
+				bookResponse.setLogo(logo);
+				bookResponse.setPrice(book1.getPrice());
+				bookResponse.setPublishedDate(book1.getPublishedDate());
+				bookResponse.setPublisher(book1.getPublisher());
+				bookResponse.setTitle(book1.getTitle());
+				return bookResponse;
+		}).collect(Collectors.toList());
+		
+		return bookResponses;
+	}
 }
