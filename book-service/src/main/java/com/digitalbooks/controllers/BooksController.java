@@ -18,6 +18,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.digitalbooks.books.BooksService;
 import com.digitalbooks.entities.Book;
+import com.digitalbooks.repositories.BookRespository;
 import com.digitalbooks.responses.BookResponse;
 import com.digitalbooks.responses.MessageResponse;
 
@@ -27,6 +28,9 @@ public class BooksController {
 	
 	@Autowired
 	BooksService booksService;
+	
+	@Autowired
+	BookRespository bookRespository;
 	
 	/*
 	 * Author can create a book
@@ -129,10 +133,21 @@ public class BooksController {
 	
 	
 	/*
+	 * verify if book exists
+	 */
+	@GetMapping("/book/{book-id}/checkBook")
+	public Boolean checkBookExistance(@PathVariable("book-id") Long bookId) {
+		
+		if(bookId == null)
+			return false;
+		return bookRespository.existsById(bookId);
+	}
+	
+	/*
 	 * Anyone can search books
 	 */
 	@GetMapping("/book/searchBooks")
-	public List<BookResponse> readBook(@RequestParam("category") String category, @RequestParam("title") String title,
+	public List<BookResponse> searchBooks(@RequestParam("category") String category, @RequestParam("title") String title,
 			@RequestParam("author") String author, @RequestParam("price") Long price,  @RequestParam("publisher") String publisher) {
 		
 		List<BookResponse> booksList = new ArrayList<>();

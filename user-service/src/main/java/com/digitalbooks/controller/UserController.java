@@ -211,14 +211,23 @@ public class UserController {
 			@PathVariable("book-id") Long bookId) {
 		if (ObjectUtils.isEmpty(bookId))
 			return ResponseEntity.badRequest().body(new MessageResponse("bookId is not valid"));
-		//call book service to check if bookId is valid
-		subscription.setBookId(bookId);
-		Optional<User> isUserPresent = userRepository.findById(subscription.getUserId());
-		if (isUserPresent.isPresent()) {
-			User user = isUserPresent.get();
-			Set<Subscription> subscriptions = user.getSubscriptions();
-			subscriptions.add(subscription);
-			return ResponseEntity.ok(userRepository.save(user));
+		
+		String uri = bookServiceHost + "/book/" + bookId + "/checkBook";
+		
+		restTemplate = new RestTemplate();
+		Boolean bookExist = restTemplate.getForObject(uri, Boolean.class);
+		
+		if(bookExist) {
+			subscription.setBookId(bookId);
+			Optional<User> isUserPresent = userRepository.findById(subscription.getUserId());
+			if (isUserPresent.isPresent()) {
+				User user = isUserPresent.get();
+				Set<Subscription> subscriptions = user.getSubscriptions();
+				subscriptions.add(subscription);
+				return ResponseEntity.ok(userRepository.save(user));
+			}
+		} else {
+			return ResponseEntity.badRequest().body(new MessageResponse("bookId is not valid"));
 		}
 		return ResponseEntity.badRequest().body(new MessageResponse("user not found"));
 	}

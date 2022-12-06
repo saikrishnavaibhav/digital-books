@@ -2,27 +2,41 @@ package com.digitalbooks.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.net.URI;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.digitalbooks.DigitalbooksUserApplication;
+import com.digitalbooks.entities.Subscription;
+import com.digitalbooks.entities.User;
+import com.digitalbooks.repositories.SubscriptionRepository;
 import com.digitalbooks.repositories.UserRepository;
+import com.digitalbooks.responses.BookResponse;
 import com.digitalbooks.userdetails.UserService;
 
 @ExtendWith(SpringExtension.class)
@@ -38,6 +52,12 @@ public class UserControllerTest {
 
 	@MockBean
 	UserRepository userRepository;
+	
+	@MockBean
+	SubscriptionRepository subscriptionRepository;
+	
+	@Mock
+	RestTemplate restTemplate;
 
 	private MockMvc mockMvc;
 
@@ -105,6 +125,63 @@ public class UserControllerTest {
 				   .andExpect(jsonPath("$.message").value("User registered successfully!"));
 	}
 	
+	@Test
+	public void testRegisterUserForExistingUserName() throws Exception {
+		
+		when(userRepository.existsByUserName(any())).thenReturn(true);
+		
+		mockMvc.perform(post("/api/v1/digitalbooks/sign-up")
+				   .contentType(MediaType.APPLICATION_JSON)
+				   .content("{\r\n"
+					   		+ "    \"userName\": \"sample\",\r\n"
+					   		+ "    \"emailId\": \"sample@gmail.com\",\r\n"
+					   		+ "    \"password\": \"Password@135\",\r\n"
+					   		+ "    \"phoneNumber\": \"1234567890\""
+					   		+ "}")						
+				   .accept(MediaType.APPLICATION_JSON))
+				   .andExpect(status().isBadRequest())
+				   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				   .andExpect(jsonPath("$.message").value("Error: UserName is already taken!"));
+	}
+	
+	@Test
+	public void testRegisterUserForExistingEmailId() throws Exception {
+		
+		when(userRepository.existsByEmailId(any())).thenReturn(true);
+		
+		mockMvc.perform(post("/api/v1/digitalbooks/sign-up")
+				   .contentType(MediaType.APPLICATION_JSON)
+				   .content("{\r\n"
+					   		+ "    \"userName\": \"sample\",\r\n"
+					   		+ "    \"emailId\": \"sample@gmail.com\",\r\n"
+					   		+ "    \"password\": \"Password@135\",\r\n"
+					   		+ "    \"phoneNumber\": \"1234567890\""
+					   		+ "}")						
+				   .accept(MediaType.APPLICATION_JSON))
+				   .andExpect(status().isBadRequest())
+				   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				   .andExpect(jsonPath("$.message").value("Error: EmailId is already in use!"));
+	}
+	
+	@Test
+	public void testRegisterUserForExistingPhoneNumber() throws Exception {
+		
+		when(userRepository.existsByPhoneNumber(any())).thenReturn(true);
+		
+		mockMvc.perform(post("/api/v1/digitalbooks/sign-up")
+				   .contentType(MediaType.APPLICATION_JSON)
+				   .content("{\r\n"
+					   		+ "    \"userName\": \"sample\",\r\n"
+					   		+ "    \"emailId\": \"sample@gmail.com\",\r\n"
+					   		+ "    \"password\": \"Password@135\",\r\n"
+					   		+ "    \"phoneNumber\": \"1234567890\""
+					   		+ "}")						
+				   .accept(MediaType.APPLICATION_JSON))
+				   .andExpect(status().isBadRequest())
+				   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				   .andExpect(jsonPath("$.message").value("Error: PhoneNumber is already in use!"));
+	}
+	
 	public void testAuthenticateUser() throws Exception {
 		
 //		when(userRepository.save(any())).thenReturn(null);
@@ -121,6 +198,106 @@ public class UserControllerTest {
 //				   .andExpect(jsonPath("$.message").value("User registered successfully!"));
 	}
 
+	@WithMockUser(roles="READER")
+	@Test
+	public void testSusbcribeABook() throws Exception {
 	
+		Optional<User> user = Optional.ofNullable(new User());
+		when(userRepository.findById(any())).thenReturn(user);
+		
+		
+		User user1 = new User();
+		Set<Subscription> subs = new HashSet<>();
+		Subscription sub = new Subscription();
+		sub.setActive(true);
+		sub.setBookId(2L);
+		sub.setUserId(3L);
+		sub.setSubscriptionTime("2022-12-04 16:19:00.100");
+		subs.add(sub);
+		user1.setSubscriptions(subs);
+		
+		when(userRepository.save(any())).thenReturn(user1);
+		
+		mockMvc.perform(post("/api/v1/digitalbooks/{book-id}/subscribe",2)
+				   .contentType(MediaType.APPLICATION_JSON)
+				   .content("{\r\n"
+				   		+ "    \"bookId\": 2,\r\n"
+				   		+ "	\"userId\": 3,\r\n"
+				   		+ "	\"active\": true,\r\n"
+				   		+ "	\"subscriptionTime\": \"2022-12-04 16:19:00.100\"\r\n"
+				   		+ "}")						
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.subscriptions[0].bookId").value(2))
+				.andExpect(jsonPath("$.subscriptions[0].userId").value(3))
+				.andExpect(jsonPath("$.subscriptions[0].active").value(true));
+	}
 	
+	@WithMockUser(roles="READER")
+	@Test
+	public void testSusbcribeABookWithBookIdNull() throws Exception {
+	
+//		when(userRepository.findById(any())).thenReturn(null);
+//		
+//		mockMvc.perform(
+//				post("/api/v1/digitalbooks/{book-id}/subscribe", 1)
+//				.contentType(MediaType.APPLICATION_JSON)
+//				.content("{\r\n"
+//				   		+ "    \"bookId\": 2,\r\n"
+//				   		+ "	\"userId\": 3,\r\n"
+//				   		+ "	\"active\": true,\r\n"
+//				   		+ "	\"subscriptionTime\": \"2022-12-04 16:19:00.100\"\r\n"
+//				   		+ "}")						
+//						.accept(MediaType.APPLICATION_JSON))
+//				.andExpect(status().isBadRequest())
+//				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+//				.andExpect(jsonPath("$.message").value("user not found"));
+		
+	}
+	
+	@WithMockUser(roles="READER")
+	@Test
+	public void testFetchSubscribedBook() throws Exception {
+		
+		when(userRepository.existsById(any())).thenReturn(true);
+		when(subscriptionRepository.existsById(any())).thenReturn(true);
+		
+		Subscription sub = getSubscripton();
+		when(userService.getSubscription(any(), any())).thenReturn(sub);
+		
+		BookResponse bookResponse = getBookSubscription();
+		RestTemplate restTemplate = new RestTemplate();
+		
+		URI uri = new URI("http://localhost:8082/api/v1/digitalbooks/book/"+sub.getBookId()+"/getSubscribedBook");
+		when(restTemplate.getForEntity(uri, BookResponse.class))
+	          .thenReturn(ResponseEntity.ok(bookResponse));
+		
+		mockMvc.perform(get("/api/v1/digitalbooks/readers/{user-id}/books/{subscription-id}",3, 4)					
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.authorId").value(1))
+				.andExpect(jsonPath("$.authorName").value("oda"))
+				.andExpect(jsonPath("$.active").value(true))
+				.andExpect(jsonPath("$.title").value("one piece"));
+	}
+
+	private BookResponse getBookSubscription() {
+		BookResponse bookResponse = new BookResponse();
+		bookResponse.setActive(true);
+		bookResponse.setAuthorId(1L);
+		bookResponse.setAuthorName("oda");
+		bookResponse.setTitle("one piece");
+		return bookResponse;
+	}
+
+	private Subscription getSubscripton() {
+		Subscription sub = new Subscription();
+		sub.setActive(true);
+		sub.setBookId(2L);
+		sub.setId(4L);
+		sub.setSubscriptionTime("2022-12-04 16:19:00.100");
+		sub.setUserId(3L);
+		return sub;
+	}
 }
