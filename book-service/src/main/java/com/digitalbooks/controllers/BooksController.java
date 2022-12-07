@@ -136,11 +136,11 @@ public class BooksController {
 	 * verify if book exists
 	 */
 	@GetMapping("/book/{book-id}/checkBook")
-	public Boolean checkBookExistance(@PathVariable("book-id") Long bookId) {
+	public String checkBookExistance(@PathVariable("book-id") Long bookId) {
 		
 		if(bookId == null)
-			return false;
-		return bookRespository.existsById(bookId);
+			return "Invalid BookId";
+		return bookRespository.existsById(bookId) ? "BookFound" : "Invalid BookId";
 	}
 	
 	/*

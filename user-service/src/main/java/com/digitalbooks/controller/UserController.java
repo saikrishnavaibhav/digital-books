@@ -80,10 +80,12 @@ public class UserController {
 	@Value("${bookservice.host}")
 	private String bookServiceHost;
 	
+	@Autowired
 	RestTemplate restTemplate;
 	
 	@Autowired
 	ObjectMapper objectMapper;
+	
 	
 	/*
 	 * Guest can sign-up as reader or author to read or create books
@@ -194,12 +196,7 @@ public class UserController {
 			return ResponseEntity.badRequest().body("Invalid request");
 		}
 		
-		String uri = bookServiceHost + "/author/" + id + "/createBook";
-
-		RestTemplate restTemplate = new RestTemplate();
-
-		MessageResponse result = restTemplate.postForObject(uri,book, MessageResponse.class);
-		return ResponseEntity.ok(result);
+		return userService.createBook(book, id);
 	}
 	
 	/*
@@ -212,24 +209,7 @@ public class UserController {
 		if (ObjectUtils.isEmpty(bookId))
 			return ResponseEntity.badRequest().body(new MessageResponse("bookId is not valid"));
 		
-		String uri = bookServiceHost + "/book/" + bookId + "/checkBook";
-		
-		restTemplate = new RestTemplate();
-		Boolean bookExist = restTemplate.getForObject(uri, Boolean.class);
-		
-		if(bookExist) {
-			subscription.setBookId(bookId);
-			Optional<User> isUserPresent = userRepository.findById(subscription.getUserId());
-			if (isUserPresent.isPresent()) {
-				User user = isUserPresent.get();
-				Set<Subscription> subscriptions = user.getSubscriptions();
-				subscriptions.add(subscription);
-				return ResponseEntity.ok(userRepository.save(user));
-			}
-		} else {
-			return ResponseEntity.badRequest().body(new MessageResponse("bookId is not valid"));
-		}
-		return ResponseEntity.badRequest().body(new MessageResponse("user not found"));
+		return userService.subscribeABook(subscription, bookId);
 	}
 	
 	/*
@@ -243,16 +223,7 @@ public class UserController {
 		if (ObjectUtils.isEmpty(subscriptionId) || !subscriptionRepository.existsById(subscriptionId))
 			return ResponseEntity.badRequest().body(new MessageResponse("subscriptionId is not valid"));
 
-		Subscription subscription = userService.getSubscription(userId, subscriptionId);
-		if(subscription != null && !ObjectUtils.isEmpty(subscription.getBookId())) {
-			String uri = bookServiceHost + "/book/" + subscription.getBookId() + "/getSubscribedBook";
-			
-			restTemplate = new RestTemplate();
-			ResponseEntity<?> result = restTemplate.getForEntity(uri, BookResponse.class);
-			return ResponseEntity.ok(result.getBody());
-		}
-		
-		return ResponseEntity.badRequest().body(new MessageResponse("invalid request"));
+		return userService.fetchSubscribedBook(userId,subscriptionId);
 	}
 	
 	/*
@@ -300,7 +271,7 @@ public class UserController {
 	}
 
 	private ResponseEntity<?> getResultResponseEntity(MessageResponse result) {
-		if(result.getMessage().equals("Book updation failed"))
+		if(result == null || result.getMessage().equals("Book updation failed"))
 			return ResponseEntity.badRequest().body(result);
 		return ResponseEntity.ok(result);
 	}
@@ -384,6 +355,8 @@ public class UserController {
 			
 		restTemplate = new RestTemplate();
 		ResponseEntity<?> result = restTemplate.getForEntity(uri, List.class);
+		if(result != null)
+			return ResponseEntity.badRequest().body(new MessageResponse("Bad Request"));
 		List<Book> books = (List<Book>) result.getBody();
 		if(books.isEmpty()) return ResponseEntity.badRequest().body(new MessageResponse("Invalid request"));
 		return ResponseEntity.ok(books);

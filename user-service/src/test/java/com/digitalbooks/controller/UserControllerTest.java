@@ -4,7 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -18,12 +18,12 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -41,6 +41,7 @@ import com.digitalbooks.repositories.SubscriptionRepository;
 import com.digitalbooks.repositories.UserRepository;
 import com.digitalbooks.responses.BookResponse;
 import com.digitalbooks.userdetails.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK, classes = { DigitalbooksUserApplication.class })
@@ -59,14 +60,21 @@ public class UserControllerTest {
 	@MockBean
 	SubscriptionRepository subscriptionRepository;
 	
+	@Autowired
 	RestTemplate restTemplate;
-
+	
 	private MockMvc mockMvc;
 
+	private MockRestServiceServer mockServer;
+	
+	private ObjectMapper mapper = new ObjectMapper();
+	
 	@BeforeEach
 	public void setup() throws Exception {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
-		this.restTemplate = Mockito.mock(RestTemplate.class);
+		this.mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+		//mockServer = MockRestServiceServer.createServer(restTemplate);
+		//this.restTemplate = Mockito.mock(TestRestTemplate.class);
 	}
 	
 	@Test
@@ -217,11 +225,12 @@ public class UserControllerTest {
 		when(userRepository.save(any())).thenReturn(user1);
 		
 		URI uri = new URI("http://localhost:8082/api/v1/digitalbooks/book/" + sub.getBookId() + "/checkBook");
-		MockRestServiceServer mockServer = MockRestServiceServer.createServer(restTemplate);
-
-		mockServer.expect(requestTo(uri)).andExpect(method(HttpMethod.GET))
-				     .andRespond(withSuccess("true", MediaType.TEXT_PLAIN_VALUE));
 		
+		//MockRestServiceServer mockServer = MockRestServiceServer.createServer(restTemplate);
+		when(restTemplate.getForObject(uri, Boolean.class)).thenReturn(true);
+		mockServer.expect(requestTo(uri)).andExpect(method(HttpMethod.GET))
+				     .andRespond(withStatus(HttpStatus.OK).body("true"));
+		mockServer.verify();
 		
 		mockMvc.perform(post("/api/v1/digitalbooks/{book-id}/subscribe",2)
 				   .contentType(MediaType.APPLICATION_JSON)
