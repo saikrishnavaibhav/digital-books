@@ -6,18 +6,25 @@ import { UserService } from '../_services/user.service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit {
-  content?: string;
-
+export class HomeComponent {
+  searchForm : any = {
+    category:null,
+    title:null,
+    author:null,
+    price:null,
+    publisher:null
+  };
+  
   constructor(private userService: UserService) { }
 
-  ngOnInit(): void {
-    this.userService.getPublicContent().subscribe(
+  onSearch(){
+    const {category, title, author,price,publisher} = this.searchForm;
+    this.userService.search(category, title, author,price,publisher).subscribe(
       data => {
-        this.content = data;
+        console.log(data);
       },
-      err => {
-        this.content = JSON.parse(err.error).message;
+      error => {
+        console.log(error);
       }
     );
   }

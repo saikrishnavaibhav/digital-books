@@ -1,5 +1,105 @@
-<div class="container">
-  <header class="jumbotron">
-    <p>{{ content }}</p>
-  </header>
+<div class="col-md-12">
+    
+  <div class="card card-container">
+    <form
+      name="form"
+      (ngSubmit)="f.form.valid && onSearch()"
+      #f="ngForm"
+      novalidate
+    >
+    <div class="form-group">
+      <label for="category">category</label>
+      <input
+        type="text"
+        class="form-control"
+        name="category"
+        [(ngModel)]="searchForm.category"
+        required
+        minlength="3"
+        #category="ngModel"
+      />
+      <div class="alert-danger" *ngIf="category.errors && f.submitted">
+        <div *ngIf="category.errors.required">category is required</div>
+        <div *ngIf="category.errors.minlength">
+          category must be at least 3 characters
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="title">title</label>
+      <input
+        type="text"
+        class="form-control"
+        name="title"
+        [(ngModel)]="searchForm.title"
+        required
+        minlength="3"
+        #title="ngModel"
+      />
+      <div class="alert-danger" *ngIf="title.errors && f.submitted">
+        <div *ngIf="title.errors.required">title is required</div>
+        <div *ngIf="title.errors.minlength">
+          title must be at least 3 characters
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="author">author</label>
+      <input
+        type="text"
+        class="form-control"
+        name="author"
+        [(ngModel)]="searchForm.author"
+        required
+        minlength="3"
+        #author="ngModel"
+      />
+      <div class="alert-danger" *ngIf="author.errors && f.submitted">
+        <div *ngIf="author.errors.required">author is required</div>
+        <div *ngIf="author.errors.minlength">
+          author must be at least 3 characters
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="price">price</label>
+      <input
+        type="number"
+        class="form-control"
+        name="price"
+        [(ngModel)]="searchForm.price"
+        required
+        minlength="1"
+        #price="ngModel"
+      />
+      <div class="alert-danger" *ngIf="price.errors && f.submitted">
+        <div *ngIf="price.errors.required">price is required</div>
+        <div *ngIf="price.errors.minlength">
+          price must be at least 1 characters
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="publisher">publisher</label>
+      <input
+        type="text"
+        class="form-control"
+        name="publisher"
+        [(ngModel)]="searchForm.publisher"
+        required
+        minlength="3"
+        #publisher="ngModel"
+      />
+      <div class="alert-danger" *ngIf="publisher.errors && f.submitted">
+        <div *ngIf="publisher.errors.required">publisher is required</div>
+        <div *ngIf="publisher.errors.minlength">
+          publisher must be at least 3 characters
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <button class="btn btn-primary btn-block">search</button>
+    </div>
+    </form>
+  </div>
 </div>
