@@ -44,7 +44,7 @@ public class UserService {
 	@Cacheable(value = "subscription")
 	public Subscription getSubscription(Long userId, Long subscriptionId) {
 
-		Subscription subscription = getSubscriptions(userId).stream().filter(sub -> sub.getId().equals(subscriptionId))
+		Subscription subscription = getSubscriptions(userId).stream().filter(sub -> sub.getId().equals(subscriptionId) && sub.isActive())
 				.findAny().orElse(null);
 		if (subscription != null) {
 			return subscription;

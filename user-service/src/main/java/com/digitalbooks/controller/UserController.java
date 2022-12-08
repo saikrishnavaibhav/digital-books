@@ -22,6 +22,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,7 +55,7 @@ import com.digitalbooks.utils.UserUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
-//@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = {"https://hoppscotch.io/","http://localhost:4200"} , maxAge = 3600)
 @RequestMapping("/api/v1/digitalbooks")
 @RefreshScope
 public class UserController {
