@@ -3,7 +3,6 @@ package com.digitalbooks.controller;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,11 +12,13 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.ObjectUtils;
@@ -26,9 +27,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,11 +45,12 @@ import com.digitalbooks.repositories.UserRepository;
 import com.digitalbooks.requests.Book;
 import com.digitalbooks.requests.LoginRequest;
 import com.digitalbooks.requests.SignupRequest;
-import com.digitalbooks.responses.BookResponse;
+import com.digitalbooks.requests.SubscriptionRequest;
 import com.digitalbooks.responses.JwtResponse;
 import com.digitalbooks.responses.MessageResponse;
 import com.digitalbooks.userdetails.UserDetailsImpl;
 import com.digitalbooks.userdetails.UserService;
+import com.digitalbooks.utils.UserUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
@@ -91,23 +94,23 @@ public class UserController {
 	 * Guest can sign-up as reader or author to read or create books
 	 */
 	@PostMapping("/sign-up")
-	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-		if (userRepository.existsByUserName(signUpRequest.getUserName())) {
+	public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+		if (Boolean.TRUE.equals(userRepository.existsByUserName(signUpRequest.getUserName()))) {
 			return ResponseEntity
 					.badRequest()
-					.body(new MessageResponse("Error: UserName is already taken!"));
+					.body(new MessageResponse(UserUtils.USERNAME_ALREADY_TAKEN));
 		}
 
-		if (userRepository.existsByEmailId(signUpRequest.getEmailId())) {
+		if (Boolean.TRUE.equals(userRepository.existsByEmailId(signUpRequest.getEmailId()))) {
 			return ResponseEntity
 					.badRequest()
-					.body(new MessageResponse("Error: EmailId is already in use!"));
+					.body(new MessageResponse(UserUtils.EMAILID_ALREADY_TAKEN));
 		}
 
-		if (userRepository.existsByPhoneNumber(signUpRequest.getPhoneNumber())) {
+		if (Boolean.TRUE.equals(userRepository.existsByPhoneNumber(signUpRequest.getPhoneNumber()))) {
 			return ResponseEntity
 					.badRequest()
-					.body(new MessageResponse("Error: PhoneNumber is already in use!"));
+					.body(new MessageResponse(UserUtils.PHONENUMBER_ALREADY_TAKEN));
 		}
 		
 		User user = new User(signUpRequest.getUserName(), 
@@ -119,20 +122,17 @@ public class UserController {
 
 		if (strRoles == null) {
 			Role userRole = roleRepository.findByRole(Roles.ROLE_READER)
-					.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+					.orElseThrow(() -> new RuntimeException(UserUtils.ROLE_NOT_FOUND));
 			roles.add(userRole);
 		} else {
 			strRoles.forEach(role -> {
-				switch (role) {
-				case "author":
+				if("author".equalsIgnoreCase(role)) {
 					Role authorRole = roleRepository.findByRole(Roles.ROLE_AUTHOR)
-							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+							.orElseThrow(() -> new RuntimeException(UserUtils.ROLE_NOT_FOUND));
 					roles.add(authorRole);
-
-					break;
-				default:
+				} else {
 					Role userRole = roleRepository.findByRole(Roles.ROLE_READER)
-							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+							.orElseThrow(() -> new RuntimeException(UserUtils.ROLE_NOT_FOUND));
 					roles.add(userRole);
 				}
 			});
@@ -149,7 +149,7 @@ public class UserController {
 	 * Guest can sign-in using valid credentials
 	 */
 	@PostMapping("/sign-in")
-	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+	public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getUserName(), loginRequest.getPassword()));
@@ -160,7 +160,7 @@ public class UserController {
 		
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();		
 		List<String> roles = userDetails.getAuthorities().stream()
-				.map(item -> item.getAuthority())
+				.map(GrantedAuthority::getAuthority)
 				.collect(Collectors.toList());
 
 		return ResponseEntity.ok(new JwtResponse(jwt, 
@@ -176,9 +176,9 @@ public class UserController {
 	 */
 	@PostMapping("/author/{author-id}/books")
 	@PreAuthorize("hasRole('AUTHOR')")
-	public ResponseEntity<?> createABook(HttpServletRequest request, @RequestParam("logo") MultipartFile logo, @Valid @RequestParam("book") String bookJsonAsString, @PathVariable("author-id") Long id) throws IOException {
+	public ResponseEntity<MessageResponse> createABook(HttpServletRequest request, @RequestParam("logo") MultipartFile logo, @Valid @RequestParam("book") String bookJsonAsString, @PathVariable("author-id") Long id) throws IOException {
 		if (ObjectUtils.isEmpty(id))
-			return ResponseEntity.badRequest().body(new MessageResponse("Author id is not valid"));
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.AUTHORID_INVALID));
 			
 		Book book = null;
 		book = objectMapper.readValue(bookJsonAsString, Book.class);
@@ -193,7 +193,7 @@ public class UserController {
 			String authorName = jwtUtils.getUserNameFromJwtToken(jwt);
 			book.setAuthorName(authorName);
 		} else {
-			return ResponseEntity.badRequest().body("Invalid request");
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 		}
 		
 		return userService.createBook(book, id);
@@ -204,12 +204,12 @@ public class UserController {
 	 */
 	@PostMapping("/{book-id}/subscribe")
 	@PreAuthorize("hasRole('READER')")
-	public ResponseEntity<?> subscribeABook(@RequestBody Subscription subscription,
+	public ResponseEntity<MessageResponse> subscribeABook(@RequestBody SubscriptionRequest subscriptionRequest,
 			@PathVariable("book-id") Long bookId) {
 		if (ObjectUtils.isEmpty(bookId))
-			return ResponseEntity.badRequest().body(new MessageResponse("bookId is not valid"));
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.BOOKID_INVALID));
 		
-		return userService.subscribeABook(subscription, bookId);
+		return userService.subscribeABook(subscriptionRequest, bookId);
 	}
 	
 	/*
@@ -219,7 +219,8 @@ public class UserController {
 	@PreAuthorize("hasRole('READER')")
 	public ResponseEntity<?> fetchSubscribedBook(@PathVariable("user-id") Long userId, @PathVariable("subscription-id") Long subscriptionId) {
 		if (ObjectUtils.isEmpty(userId) || !userRepository.existsById(userId))
-			return ResponseEntity.badRequest().body(new MessageResponse("userId is not valid"));
+			throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, UserUtils.USERID_INVALID);
+			//return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.USERID_INVALID));
 		if (ObjectUtils.isEmpty(subscriptionId) || !subscriptionRepository.existsById(subscriptionId))
 			return ResponseEntity.badRequest().body(new MessageResponse("subscriptionId is not valid"));
 
@@ -233,13 +234,13 @@ public class UserController {
 	@PreAuthorize("hasRole('READER')")
 	public ResponseEntity<?> fetchAllSubscribedBooks(@PathVariable("user-id") Long userId) {
 		if (ObjectUtils.isEmpty(userId) || !userRepository.existsById(userId))
-			return ResponseEntity.badRequest().body(new MessageResponse("userId is not valid"));
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.USERID_INVALID));
 		
 		Set<Subscription> subscriptionsList = userService.getSubscriptions(userId);
 		System.out.println(subscriptionsList);
 		if(!subscriptionsList.isEmpty()) {
 			
-			List<Long> bookIds = subscriptionsList.stream().map(sub -> sub.getBookId()).collect(Collectors.toList());
+			List<Long> bookIds = subscriptionsList.stream().map(Subscription::getBookId).collect(Collectors.toList());
 			
 			String uri = bookServiceHost + "/book/getSubscribedBooks";
 			
@@ -248,7 +249,7 @@ public class UserController {
 			return ResponseEntity.ok(result.getBody());
 		}
 		
-		return ResponseEntity.badRequest().body(new MessageResponse("invalid request"));
+		return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 	}
 
 	/*
@@ -256,11 +257,11 @@ public class UserController {
 	 */
 	@PostMapping("/author/{author-id}/books/{book-id}")
 	@PreAuthorize("hasRole('AUTHOR')")
-	public ResponseEntity<?> blockABook(@PathVariable("author-id") int authorId, @PathVariable("book-id") int bookId, @RequestParam("block") boolean block) {
+	public ResponseEntity<MessageResponse> blockABook(@PathVariable("author-id") int authorId, @PathVariable("book-id") int bookId, @RequestParam("block") boolean block) {
 		if (ObjectUtils.isEmpty(authorId))
-			return ResponseEntity.badRequest().body(new MessageResponse("Author id is not valid"));
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.AUTHORID_INVALID));
 		if (ObjectUtils.isEmpty(bookId))
-			return ResponseEntity.badRequest().body(new MessageResponse("Book id is not valid"));
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.BOOKID_INVALID));
 		
 		String uri = bookServiceHost + "/author/" + authorId + "/blockBook/" + bookId +"?block=" + block;
 
@@ -270,7 +271,7 @@ public class UserController {
 		return getResultResponseEntity(result);
 	}
 
-	private ResponseEntity<?> getResultResponseEntity(MessageResponse result) {
+	private ResponseEntity<MessageResponse> getResultResponseEntity(MessageResponse result) {
 		if(result == null || result.getMessage().equals("Book updation failed"))
 			return ResponseEntity.badRequest().body(result);
 		return ResponseEntity.ok(result);
@@ -283,9 +284,9 @@ public class UserController {
 	@PreAuthorize("hasRole('AUTHOR')")
 	public ResponseEntity<?> updateABook(@RequestBody Book book, @PathVariable("author-id") Long authorId, @PathVariable("book-id") Long bookId) {
 		if (ObjectUtils.isEmpty(authorId))
-			return ResponseEntity.badRequest().body(new MessageResponse("Author id is not valid"));
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.AUTHORID_INVALID));
 		if (ObjectUtils.isEmpty(bookId))
-			return ResponseEntity.badRequest().body(new MessageResponse("Book id is not valid"));
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.BOOKID_INVALID));
 		
 		String uri = bookServiceHost + "/author/" + authorId + "/updateBook/" + bookId;
 
@@ -355,7 +356,7 @@ public class UserController {
 			
 		restTemplate = new RestTemplate();
 		ResponseEntity<?> result = restTemplate.getForEntity(uri, List.class);
-		if(result != null)
+		if(result == null)
 			return ResponseEntity.badRequest().body(new MessageResponse("Bad Request"));
 		List<Book> books = (List<Book>) result.getBody();
 		if(books.isEmpty()) return ResponseEntity.badRequest().body(new MessageResponse("Invalid request"));

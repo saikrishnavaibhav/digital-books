@@ -28,7 +28,9 @@ import com.digitalbooks.entities.User;
 import com.digitalbooks.jwt.JwtUtils;
 import com.digitalbooks.repositories.SubscriptionRepository;
 import com.digitalbooks.repositories.UserRepository;
+import com.digitalbooks.requests.SubscriptionRequest;
 import com.digitalbooks.responses.BookResponse;
+import com.digitalbooks.responses.MessageResponse;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -68,9 +70,6 @@ public class UserServiceTest {
 
 	@Test
 	public void testCancelSubscription() {
-		Optional<User> user = Optional.ofNullable(new User());
-		
-		
 		Optional<User> user1 = Optional.ofNullable(new User());
 		Set<Subscription> subs = new HashSet<>();
 		Subscription sub = getSubscripton();
@@ -131,7 +130,7 @@ public class UserServiceTest {
           .when(restTemplate.getForObject(uri, String.class))
           .thenReturn("BookFound");
     	
-        ResponseEntity<?> res = userService.subscribeABook(getSubscripton(), 4L);
+        ResponseEntity<MessageResponse> res = userService.subscribeABook(getSubscriptonRequest(), 4L);
  
         assertEquals(HttpStatus.OK, res.getStatusCode());
 	}
@@ -146,14 +145,14 @@ public class UserServiceTest {
           .when(restTemplate.getForObject(uri, String.class))
           .thenReturn("Invalid BookId");
     	
-        ResponseEntity<?> res = userService.subscribeABook(getSubscripton(), 4L);
+        ResponseEntity<MessageResponse> res = userService.subscribeABook(getSubscriptonRequest(), 4L);
  
         assertEquals(HttpStatus.BAD_REQUEST, res.getStatusCode());
 	}
 	
 	@Test
 	void testSubscribeABookWithUserNull() {
-        ResponseEntity<?> res = userService.subscribeABook(getSubscripton(), 4L);
+        ResponseEntity<MessageResponse> res = userService.subscribeABook(getSubscriptonRequest(), 4L);
         assertEquals(HttpStatus.BAD_REQUEST, res.getStatusCode());
 	}
 
@@ -214,5 +213,14 @@ public class UserServiceTest {
 		sub.setUserId(3L);
 		return sub;
 	}
-	
+
+	private SubscriptionRequest getSubscriptonRequest() {
+		SubscriptionRequest sub = new SubscriptionRequest();
+		sub.setActive(true);
+		sub.setBookId(4L);
+		sub.setId(4L);
+		sub.setSubscriptionTime("2022-11-01 16:19:00.100");
+		sub.setUserId(3L);
+		return sub;
+	}
 }

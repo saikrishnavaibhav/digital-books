@@ -247,56 +247,8 @@ public class UserControllerTest {
 				.andExpect(jsonPath("$.subscriptions[0].active").value(true));
 	}
 	
-	@WithMockUser(roles="READER")
-	@Test
-	public void testSusbcribeABookWithBookIdNull() throws Exception {
-	
-//		when(userRepository.findById(any())).thenReturn(null);
-//		
-//		mockMvc.perform(
-//				post("/api/v1/digitalbooks/{book-id}/subscribe", 1)
-//				.contentType(MediaType.APPLICATION_JSON)
-//				.content("{\r\n"
-//				   		+ "    \"bookId\": 2,\r\n"
-//				   		+ "	\"userId\": 3,\r\n"
-//				   		+ "	\"active\": true,\r\n"
-//				   		+ "	\"subscriptionTime\": \"2022-12-04 16:19:00.100\"\r\n"
-//				   		+ "}")						
-//						.accept(MediaType.APPLICATION_JSON))
-//				.andExpect(status().isBadRequest())
-//				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-//				.andExpect(jsonPath("$.message").value("user not found"));
-		
-	}
-	
-	//@WithMockUser(roles="READER")
-	//@Test
-	public void testFetchSubscribedBook() throws Exception {
-		
-//		when(userRepository.existsById(any())).thenReturn(true);
-//		when(subscriptionRepository.existsById(any())).thenReturn(true);
-//		
-//		Subscription sub = getSubscripton();
-//		when(userService.getSubscription(any(), any())).thenReturn(sub);
-//		
-//		BookResponse bookResponse = getBookSubscription();
-//		RestTemplate restTemplate = new RestTemplate();
-//		
-//		URI uri = new URI("http://localhost:8082/api/v1/digitalbooks/book/"+sub.getBookId()+"/getSubscribedBook");
-//		when(restTemplate.getForEntity(uri, BookResponse.class))
-//	          .thenReturn(ResponseEntity.ok(bookResponse));
-//		
-//		mockMvc.perform(get("/api/v1/digitalbooks/readers/{user-id}/books/{subscription-id}",3, 4)					
-//				.accept(MediaType.APPLICATION_JSON))
-//				.andExpect(status().isOk())
-//				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-//				.andExpect(jsonPath("$.authorId").value(1))
-//				.andExpect(jsonPath("$.authorName").value("oda"))
-//				.andExpect(jsonPath("$.active").value(true))
-//				.andExpect(jsonPath("$.title").value("one piece"));
-	}
 
-	private BookResponse getBookSubscription() {
+	private BookResponse getBookResponse() {
 		BookResponse bookResponse = new BookResponse();
 		bookResponse.setActive(true);
 		bookResponse.setAuthorId(1L);

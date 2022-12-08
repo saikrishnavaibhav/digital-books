@@ -18,8 +18,10 @@ import com.digitalbooks.jwt.JwtUtils;
 import com.digitalbooks.repositories.SubscriptionRepository;
 import com.digitalbooks.repositories.UserRepository;
 import com.digitalbooks.requests.Book;
+import com.digitalbooks.requests.SubscriptionRequest;
 import com.digitalbooks.responses.BookResponse;
 import com.digitalbooks.responses.MessageResponse;
+import com.digitalbooks.utils.UserUtils;
 
 @Component
 public class UserService {
@@ -85,9 +87,14 @@ public class UserService {
 		return ResponseEntity.badRequest().body(new MessageResponse("Invalid Subscription"));
 	}
 
-	public ResponseEntity<?> subscribeABook(Subscription subscription, Long bookId) {
+	public ResponseEntity<MessageResponse> subscribeABook(SubscriptionRequest subscriptionRequest, Long bookId) {
 		
+		Subscription subscription = new Subscription();
+		subscription.setActive(subscriptionRequest.isActive());
 		subscription.setBookId(bookId);
+		subscription.setSubscriptionTime(subscriptionRequest.getSubscriptionTime());
+		subscription.setUserId(subscriptionRequest.getUserId());
+		
 		Optional<User> isUserPresent = userRepository.findById(subscription.getUserId());
 		if (isUserPresent.isPresent()) {
 			
@@ -95,7 +102,7 @@ public class UserService {
 			
 			Boolean bookExist = false;
 			String value= restTemplate.getForObject(uri, String.class);
-			bookExist = value.equalsIgnoreCase("BookFound") ? true : false;
+			bookExist = "BookFound".equalsIgnoreCase(value) ? true : false;
 			if(bookExist) {
 				
 				User user = isUserPresent.get();
@@ -104,14 +111,14 @@ public class UserService {
 				userRepository.save(user);
 				return ResponseEntity.ok(new MessageResponse("subscribed successfully"));
 			} else 
-				return ResponseEntity.badRequest().body(new MessageResponse("bookId is not valid"));
+				return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.BOOKID_INVALID));
 		
 		} else 
-			return ResponseEntity.badRequest().body(new MessageResponse("userId is not valid"));
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.USERID_INVALID));
 		
 	}
 
-	public ResponseEntity<?> createBook( Book book, Long id) {
+	public ResponseEntity<MessageResponse> createBook( Book book, Long id) {
 		
 		String uri = bookServiceHost + "/author/" + id + "/createBook";
 
