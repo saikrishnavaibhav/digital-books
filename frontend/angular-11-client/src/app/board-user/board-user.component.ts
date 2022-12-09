@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TokenStorageService } from '../_services/token-storage.service';
 import { UserService } from '../_services/user.service';
 
 @Component({
@@ -8,17 +9,47 @@ import { UserService } from '../_services/user.service';
 })
 export class BoardUserComponent implements OnInit {
   content?: string;
+  user: any = {
+    id: null,
+    userName: null,
+    emailId: null,
+    phoneNumber: null,
+    roles :null,
+    subscriptions:null
+  };
 
-  constructor(private userService: UserService) { }
+  public book : any = {
+    id: null,
+    logo: null,
+    title: null,
+    authorId: null,
+    authorName: null,
+    publisher: null,
+    category: null,
+    content: null,
+    price: null,
+    publishedDate: null,
+    active: null
+  }
+
+  constructor(private userService: UserService, private tokenStorageService: TokenStorageService) { }
 
   ngOnInit(): void {
-    this.userService.getUserBoard().subscribe(
+    
+    this.user = this.tokenStorageService.getUser();
+    this.userService.getSubscribedBooks(this.user.id).subscribe(
       data => {
-        this.content = data;
+        let books = [];
+        for(let b of data){
+          this.book = b;
+          console.log(this.book);
+          books.push(this.book);
+        }
+        console.log(books);
       },
-      err => {
-        this.content = JSON.parse(err.error).message;
+      error => {
+        console.error(error);
       }
-    );
+    )
   }
 }
