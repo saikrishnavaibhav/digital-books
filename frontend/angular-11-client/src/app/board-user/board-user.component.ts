@@ -42,7 +42,6 @@ export class BoardUserComponent implements OnInit {
         let books = [];
         for(let b of data){
           this.book = b;
-          console.log(this.book);
           books.push(this.book);
         }
         console.log(books);
