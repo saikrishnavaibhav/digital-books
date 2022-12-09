@@ -12,7 +12,7 @@ export class RegisterComponent {
     emailId: null,
     phoneNumber: null,
     password: null,
-    role: null
+    roles: null
   };
   isSuccessful = false;
   isSignUpFailed = false;
@@ -21,10 +21,10 @@ export class RegisterComponent {
   constructor(private authService: AuthService) { }
 
   onSubmit(): void {
-    const { userName, emailId, phoneNumber, password, role } = this.form;
-    let roles = []
-    roles.push(role);
-    this.authService.register(userName, emailId, phoneNumber, password, roles).subscribe(
+    const { userName, emailId, phoneNumber, password, roles } = this.form;
+    let role = []
+    role.push(roles);
+    this.authService.register(userName, emailId, phoneNumber, password, role).subscribe(
       data => {
         console.log(data);
         this.isSuccessful = true;
