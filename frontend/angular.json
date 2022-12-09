@@ -59,8 +59,17 @@
                   "maximumError": "4kb"
                 }
               ]
+            },
+            "development": { 
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
             }
-          }
+          },
+          "defaultConfiguration": "development"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
@@ -124,5 +133,5 @@
       }
     }
   },
-  "defaultProject": "Angular11JwtAuth"
+  "defaultProject": "frontend"
 }
