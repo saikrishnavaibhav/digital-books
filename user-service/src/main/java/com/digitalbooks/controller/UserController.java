@@ -55,7 +55,8 @@ import com.digitalbooks.utils.UserUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
-@CrossOrigin(origins = {"https://hoppscotch.io/","http://localhost:4200"} , maxAge = 3600)
+@CrossOrigin(origins = "*" , maxAge = 3600)
+//{"https://hoppscotch.io/","http://localhost:4200/"}
 @RequestMapping("/api/v1/digitalbooks")
 @RefreshScope
 public class UserController {
@@ -238,7 +239,7 @@ public class UserController {
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.USERID_INVALID));
 		
 		Set<Subscription> subscriptionsList = userService.getSubscriptions(userId);
-		System.out.println(subscriptionsList);
+		
 		if(!subscriptionsList.isEmpty()) {
 			
 			List<Long> bookIds = subscriptionsList.stream().map(Subscription::getBookId).collect(Collectors.toList());
