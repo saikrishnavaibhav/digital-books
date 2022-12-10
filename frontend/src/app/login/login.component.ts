@@ -24,6 +24,11 @@ export class LoginComponent implements OnInit {
     if (this.tokenStorage.getToken()) {
       this.isLoggedIn = true;
       this.roles = this.tokenStorage.getUser().roles;
+      if("ROLE_READER" === this.roles[0]) {
+        this.router.navigateByUrl('/user');
+      } else if("ROLE_AUTHOR" === this.roles[0]){
+        this.router.navigateByUrl('/home');   
+      }
     }
   }
 
@@ -48,9 +53,6 @@ export class LoginComponent implements OnInit {
   }
 
   loadProfile(): void {
-    setTimeout(()=>{
-      this.router.navigateByUrl('/user');
-    }, 1000);
-    
+    window.location.reload();
   }
 }
