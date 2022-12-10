@@ -1,0 +1,19 @@
+.container{
+    width: 100%;
+    height: 100%;
+}
+
+.list-group{
+    display: table-row;
+    
+}
+.list-group-item {
+    width: 280px;
+    height: 220px;
+    display: table-cell;
+    
+}
+.book-container{
+    text-align: center;
+    align-items: center;
+}

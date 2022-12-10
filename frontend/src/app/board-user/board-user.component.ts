@@ -7,7 +7,9 @@ import { UserService } from '../_services/user.service';
   templateUrl: './board-user.component.html',
   styleUrls: ['./board-user.component.css']
 })
+
 export class BoardUserComponent implements OnInit {
+  
   content?: string;
   user: any = {
     id: null,
@@ -18,7 +20,9 @@ export class BoardUserComponent implements OnInit {
     subscriptions:null
   };
 
-  public book : any = {
+  public books:any[] = []
+
+  book : any = {
     id: null,
     logo: null,
     title: null,
@@ -35,20 +39,38 @@ export class BoardUserComponent implements OnInit {
   constructor(private userService: UserService, private tokenStorageService: TokenStorageService) { }
 
   ngOnInit(): void {
-    
+    //let books: any[] = [];
     this.user = this.tokenStorageService.getUser();
     this.userService.getSubscribedBooks(this.user.id).subscribe(
       data => {
-        let books = [];
+        
+        console.log("books -> " + this.books);
         for(let b of data){
           this.book = b;
-          books.push(this.book);
+          this.books.push(this.book);
         }
-        console.log(books);
+        console.log("after adding books -> "+this.books);
+        for (let b of this.books){
+          console.log("book => "+b);
+        }
       },
       error => {
         console.error(error);
       }
-    )
+    );
+
   }
+
+  onClick(id : any) : void {
+    this.userService.getSubscribedBook(id).subscribe(
+      data => { 
+        console.log("data -> " + data);
+        
+      },
+      error => {
+        console.error(error);
+      }
+    );
+  }
+
 }

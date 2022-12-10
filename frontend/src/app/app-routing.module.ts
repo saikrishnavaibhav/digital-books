@@ -8,6 +8,7 @@ import { ProfileComponent } from './profile/profile.component';
 import { BoardUserComponent } from './board-user/board-user.component';
 import { CreatebookComponent } from './createbook/createbook.component';
 import { AllmybooksComponent } from './allmybooks/allmybooks.component';
+import { BookdetailsComponent } from './bookdetails/bookdetails.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -17,6 +18,7 @@ const routes: Routes = [
   { path: 'user', component: BoardUserComponent },
   { path: 'createBook', component: CreatebookComponent },
   { path: 'allMybooks', component: AllmybooksComponent },
+  { path: 'book/:Id', component: BookdetailsComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];
 

@@ -12,7 +12,7 @@ const httpOptions = {
   providedIn: 'root'
 })
 export class UserService {
- 
+  
   constructor(private http: HttpClient) { }
 
   search(category: any, title: any, author: any, price: any, publisher: any) : Observable<any> {
@@ -27,6 +27,10 @@ export class UserService {
   }
 
   getSubscribedBooks(id: any) : Observable<any> { 
+    return this.http.get(API_URL + '/readers/'+id+'/books');
+  }
+
+  getSubscribedBook(id: any) : Observable<any> { 
     return this.http.get(API_URL + '/readers/'+id+'/books');
   }
 }
