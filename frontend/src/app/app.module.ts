@@ -12,6 +12,8 @@ import { ProfileComponent } from './profile/profile.component';
 import { BoardUserComponent } from './board-user/board-user.component';
 import { authInterceptorProviders } from './_helpers/auth.interceptor';
 import { SearchbooksComponent } from './searchbooks/searchbooks.component';
+import { CreatebookComponent } from './createbook/createbook.component';
+import { AllmybooksComponent } from './allmybooks/allmybooks.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +23,9 @@ import { SearchbooksComponent } from './searchbooks/searchbooks.component';
     HomeComponent,
     ProfileComponent,
     BoardUserComponent,
-    SearchbooksComponent
+    SearchbooksComponent,
+    CreatebookComponent,
+    AllmybooksComponent
   ],
   imports: [
     BrowserModule,
