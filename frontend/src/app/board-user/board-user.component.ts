@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { BookstorageService } from '../_services/bookstorage.service';
 import { TokenStorageService } from '../_services/token-storage.service';
 import { UserService } from '../_services/user.service';
 
@@ -22,7 +23,7 @@ export class BoardUserComponent implements OnInit {
 
   public books:any[] = []
 
-  book : any = {
+  public book : any = {
     id: null,
     logo: null,
     title: null,
@@ -36,10 +37,9 @@ export class BoardUserComponent implements OnInit {
     active: null
   }
 
-  constructor(private userService: UserService, private tokenStorageService: TokenStorageService) { }
+  constructor(private userService: UserService, private tokenStorageService: TokenStorageService, private bookService: BookstorageService) { }
 
   ngOnInit(): void {
-    //let books: any[] = [];
     this.user = this.tokenStorageService.getUser();
     this.userService.getSubscribedBooks(this.user.id).subscribe(
       data => {
@@ -61,16 +61,8 @@ export class BoardUserComponent implements OnInit {
 
   }
 
-  onClick(id : any) : void {
-    this.userService.getSubscribedBook(id).subscribe(
-      data => { 
-        console.log("data -> " + data);
-        
-      },
-      error => {
-        console.error(error);
-      }
-    );
+  onClick(book : any) : void {
+    this.bookService.setBook(book);
   }
 
 }

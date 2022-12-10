@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { BoardUserComponent } from '../board-user/board-user.component';
+import { BookstorageService } from '../_services/bookstorage.service';
+import { Book } from '../_services/bookstorage.service';
 
 @Component({
   selector: 'app-bookdetails',
@@ -9,10 +9,14 @@ import { BoardUserComponent } from '../board-user/board-user.component';
 })
 export class BookdetailsComponent implements OnInit{
 
+  book :any;
 
   ngOnInit(): void {
+    this.book = this.bookService.getBook();
+    console.log("book => ");
+    console.log(this.book);
   }
 
-  constructor(private route: ActivatedRoute) { }
+  constructor(private bookService: BookstorageService) { }
 
 }

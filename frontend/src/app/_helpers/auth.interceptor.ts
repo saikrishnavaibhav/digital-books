@@ -23,17 +23,14 @@ export class AuthInterceptor implements HttpInterceptor {
     return next.handle(authReq).pipe(tap(()=> {},
     
       (error:any) => {
-        console.log("here"  + error);
-        if( error instanceof HttpErrorResponse){
-          console.log(error);
-          if(error.status !== 401){ 
-            return;
-          }
-          console.log("error 401");
+       if( error instanceof HttpErrorResponse){
+         if(error.status === 401){ 
+          console.error(error);
           this.router.navigateByUrl('/login')
           this.token.signOut();
         }
       }
+    }
     ));
   }
 }

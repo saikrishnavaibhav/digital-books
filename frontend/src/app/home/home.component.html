@@ -100,6 +100,17 @@
     <div class="form-group">
       <button class="btn btn-primary btn-block">search</button>
     </div>
-    </form>
+    
+    <div class="form-group">
+      <div
+        class="alert alert-danger"
+        role="alert"
+        *ngIf="isSearchFailed"
+      >
+        Search failed: {{ errorMessage }}
+      </div>
+    </div>
+  </form>
+
   </div>
 </div>

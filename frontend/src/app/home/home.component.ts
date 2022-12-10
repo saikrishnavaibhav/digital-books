@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../_services/user.service';
 
@@ -7,6 +8,10 @@ import { UserService } from '../_services/user.service';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent {
+
+  isSearchFailed = false;
+  errorMessage = "";
+
   searchForm : any = {
     category:null,
     title:null,
@@ -24,7 +29,15 @@ export class HomeComponent {
         console.log(data);
       },
       error => {
-        console.log(error);
+        console.error(error);
+        this.isSearchFailed = true;
+        
+        if(error instanceof HttpErrorResponse){
+          console.error(error.error.message);
+          this.errorMessage = error.error.message
+        }
+        
+        
       }
     );
   }
