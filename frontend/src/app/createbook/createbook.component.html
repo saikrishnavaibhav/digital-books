@@ -1,1 +1,139 @@
-<p>createbook works!</p>
+<div class="card">
+    <img
+      id="profile-img"
+      src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
+      class="profile-img-card"
+      width="400px"
+      height="500px"
+    />
+    <form
+      *ngIf="!isSuccessful"
+      name="form"
+      (ngSubmit)="f.form.valid && onCreate()"
+      #f="ngForm"
+      novalidate
+    >
+    <div class="form-group">
+        <label for="title">Title</label>
+        <input
+          type="text"
+          class="form-control"
+          name="title"
+          [(ngModel)]="book.title"
+          required
+          minlength="3"
+          maxlength="20"
+          #title="ngModel"
+        />
+        <div class="alert-danger" *ngIf="title.errors && f.submitted">
+          <div *ngIf="title.errors.required">title is required</div>
+          <div *ngIf="title.errors.minlength">
+            title must be at least 3 characters
+          </div>
+          <div *ngIf="title.errors.maxlength">
+            title must be at most 20 characters
+          </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="publisher">publisher</label>
+        <input
+          type="text"
+          class="form-control"
+          name="publisher"
+          [(ngModel)]="book.publisher"
+          required
+          minlength="3"
+          maxlength="20"
+          #publisher="ngModel"
+        />
+        <div class="alert-danger" *ngIf="publisher.errors && f.submitted">
+          <div *ngIf="publisher.errors.required">publisher is required</div>
+          <div *ngIf="publisher.errors.minlength">
+            publisher must be at least 3 characters
+          </div>
+          <div *ngIf="publisher.errors.maxlength">
+            publisher must be at most 20 characters
+          </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="category">category</label>
+        <input
+          type="text"
+          class="form-control"
+          name="category"
+          [(ngModel)]="book.category"
+          required
+          minlength="3"
+          maxlength="20"
+          #category="ngModel"
+          />
+        <div class="alert-danger" *ngIf="category.errors && f.submitted">
+          <div *ngIf="category.errors.required">category is required</div>
+          <div *ngIf="category.errors.minlength">
+            category must be at least 3 characters
+          </div>
+          <div *ngIf="category.errors.maxlength">
+            category must be at most 20 characters
+          </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="price">price</label>
+        <input
+          type="number"
+          class="form-control"
+          name="price"
+          [(ngModel)]="book.price"
+          required
+          minlength="1"
+          maxlength="20"
+          #price="ngModel"
+        />
+        <div class="alert-danger" *ngIf="price.errors && f.submitted">
+          <div *ngIf="price.errors.required">price is required</div>
+          <div *ngIf="price.errors.minlength">
+            price must be at least 3 characters
+          </div>
+          <div *ngIf="price.errors.maxlength">
+            price must be at most 20 characters
+          </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="content">content</label>
+        <textarea
+          type="text"
+          class="form-control"
+          name="content"
+          [(ngModel)]="book.content"
+          required
+          minlength="50"
+          maxlength="2000"
+          #content="ngModel"
+        ></textarea>
+        <div class="alert-danger" *ngIf="content.errors && f.submitted">
+          <div *ngIf="content.errors.required">content is required</div>
+          <div *ngIf="content.errors.minlength">
+            content must be at least 50 characters
+          </div>
+          <div *ngIf="content.errors.maxlength">
+            content must be at most 2000 characters
+          </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary btn-block">create book</button>
+      </div>
+
+      <div class="alert alert-warning" *ngIf="f.submitted && !isSuccessful">
+        Book Creation failed!<br />{{ errorMessage }}
+      </div>
+    </form>
+
+    <div class="alert alert-success" *ngIf="isSuccessful">
+        Created Book {{book.title}} successfully
+      </div>
+
+</div>
