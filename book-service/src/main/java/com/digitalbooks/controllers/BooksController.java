@@ -36,11 +36,14 @@ public class BooksController {
 	 * Author can create a book
 	 */
 	@PostMapping("/author/{author-id}/createBook")
-	public ResponseEntity<?> createBook(@RequestBody Book book, @PathVariable("author-id") Long id){
+	public ResponseEntity<?> createBook(@RequestBody Book book, @PathVariable("author-id") Long id) throws Exception, IllegalArgumentException{
 		if(id == null)
 			return ResponseEntity.badRequest().body("Invalid author Id");
 		book.setAuthorId(id);
-		return ResponseEntity.ok(booksService.saveBook(book, id));
+		MessageResponse response = booksService.saveBook(book, id);
+		if("Book with same title exists!".equals(response.getMessage()))
+			return ResponseEntity.badRequest().body("Book with same title exists!");
+		return ResponseEntity.ok(response);
 	}
 	
 	/*

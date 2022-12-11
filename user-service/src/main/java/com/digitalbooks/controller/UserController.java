@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.digitalbooks.entities.Role;
 import com.digitalbooks.entities.Roles;
@@ -178,17 +178,9 @@ public class UserController {
 	 */
 	@PostMapping("/author/{author-id}/books")
 	@PreAuthorize("hasRole('AUTHOR')")
-	public ResponseEntity<MessageResponse> createABook(HttpServletRequest request, @RequestParam("logo") MultipartFile logo, @Valid @RequestParam("book") String bookJsonAsString, @PathVariable("author-id") Long id) throws IOException {
+	public ResponseEntity<MessageResponse> createABook(HttpServletRequest request, @RequestBody Book book, @PathVariable("author-id") Long id) throws IOException, ResponseStatusException {
 		if (ObjectUtils.isEmpty(id))
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.AUTHORID_INVALID));
-			
-		Book book = null;
-		book = objectMapper.readValue(bookJsonAsString, Book.class);
-		
-		if(logo != null)
-			book.setLogo(logo.getBytes());
-		else
-			return ResponseEntity.badRequest().body(new MessageResponse("Logo is not valid"));
 		
 		String jwt = jwtUtils.parseJwt(request);
 		if (jwt != null && jwtUtils.validateJwtToken(jwt)) {

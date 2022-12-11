@@ -39,14 +39,14 @@ public class RestControllerExceptionHandler {
     @ExceptionHandler(HttpClientErrorException.class)
     public ResponseEntity<String> handleHttpClientErrorException(HttpClientErrorException exception) {
 		log.error(exception.getMessage());
+        return ResponseEntity.badRequest().body(exception.getMessage().split(" : ")[1]);
+    }
+	
+	@ResponseStatus(HttpStatus.BAD_REQUEST) 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException exception) {
+		log.error(exception.getMessage());
         return ResponseEntity.badRequest().body(exception.getMessage());
     }
 	
-//	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR) 
-//    @ExceptionHandler(Exception.class)
-//    public String handleAnyException(Exception exception) {
-//		log.error(exception.getMessage());
-//        return exception.getMessage();
-//    }
-
 }
