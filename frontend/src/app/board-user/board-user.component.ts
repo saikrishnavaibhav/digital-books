@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { HomeComponent } from '../home/home.component';
 import { BookstorageService } from '../_services/bookstorage.service';
 import { TokenStorageService } from '../_services/token-storage.service';
 import { UserService } from '../_services/user.service';
@@ -57,6 +58,26 @@ export class BoardUserComponent implements OnInit {
 
   onClick(book : any) : void {
     this.bookService.setBook(book);
+  }
+
+  onCancelSubscription(bookId : any) : void {
+    let subs : any[] = this.tokenStorageService.getUser().subscriptions;
+    let subId = null;
+    for(let sub of subs){
+      if(bookId === sub.bookId) {
+        subId = sub.id;
+      }
+    }
+    this.userService.cancelSubscription(subId, this.tokenStorageService.getUser().id).subscribe(
+      data=>{
+        console.log(data);
+        this.tokenStorageService.reloadUser(this.tokenStorageService.getUser().id);
+        window.location.reload();
+      },
+      error=>{
+        console.error(error);
+      }
+    )
   }
 
 }

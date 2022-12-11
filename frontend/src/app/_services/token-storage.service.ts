@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { UserService } from './user.service';
 
 const TOKEN_KEY = 'auth-token';
 const USER_KEY = 'auth-user';
@@ -7,7 +8,7 @@ const USER_KEY = 'auth-user';
   providedIn: 'root'
 })
 export class TokenStorageService {
-  constructor() { }
+  constructor(private userService:UserService) { }
 
   signOut(): void {
     window.sessionStorage.clear();
@@ -33,6 +34,18 @@ export class TokenStorageService {
       return JSON.parse(user);
     }
 
-    return {};
+    return null;
+  }
+
+  public reloadUser(id:any){
+    this.userService.loadUser(id).subscribe(
+      data=> {
+        console.log(data);
+        this.saveUser(data);
+      },
+      error=>{
+        console.error(error);
+      }
+    );
   }
 }

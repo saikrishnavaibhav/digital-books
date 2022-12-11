@@ -1,5 +1,5 @@
 <div class="col-md-12">
-  <div class="card card-container">
+  <div class="card card-container" *ngIf="!isSearchSuccess">
     <h3>Search Books</h3>
     <form
       name="form"
@@ -105,12 +105,28 @@
       <div
         class="alert alert-danger"
         role="alert"
-        *ngIf="isSearchFailed"
+        *ngIf="isSearchSuccess"
       >
         Search failed: {{ errorMessage }}
       </div>
     </div>
   </form>
-
+  </div>
+  <div class="container" ng-app="Subsciptions App" ng-controller="Subsciptions controller" *ngIf="isSearchSuccess">
+    <button (click)="oncancelSearch()">cancel search</button>
+    <h3>Books related to search</h3>   
+      <ul class="list-group">
+        <li class="list-group-item" *ngFor="let book of books">
+          <div class="book-container"  (click)="onClick(book)">
+            <img src="https://i.pinimg.com/474x/dd/95/a3/dd95a351f81a30205d6fd1428fd28b8d.jpg" alt="" width="250" height="200"><!--{{book.logo}}-->
+            <br>
+            {{book.title}}
+          </div>
+          <div class="book-edit-container" *ngIf="isUserLoggedIn">
+            <button (click)="onSubscribe(book.id)" *ngIf="!subscribed(book.id)">subscribe</button><!-- [routerLink]="['/updateBook']"-->
+            <button (click)="onUnSubscribe(book.id)" *ngIf="subscribed(book.id)">unsubscribe</button><!-- [routerLink]="['/updateBook']"-->
+          </div>
+        </li>
+      </ul>
   </div>
 </div>

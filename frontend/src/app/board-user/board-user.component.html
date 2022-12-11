@@ -8,6 +8,9 @@
           <br>
           {{book.title}}
         </div>
+        <div class="book-edit-container">
+          <button (click)="onCancelSubscription(book.id)">cancel subscription</button><!-- [routerLink]="['/updateBook']"-->
+        </div>
       </li>
     </ul>
 </div>
