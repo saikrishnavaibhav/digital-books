@@ -24,10 +24,16 @@ export class CreatebookComponent {
   onCreate(){
     const{logo, title, publisher,category,content,price} = this.book;
     this.authorService.createBook(this.book).subscribe(data=> {
-      console.log(data);
+      console.log(data.message);
+      this.isSuccessful = true;
+      // setTimeout(() => {
+      //   window.location.reload();
+      // }, 1000);
     },
     error=> {
       console.error(error);
+      this.errorMessage = error.error;
+      this.isSuccessful = false;
     })
   }
 
