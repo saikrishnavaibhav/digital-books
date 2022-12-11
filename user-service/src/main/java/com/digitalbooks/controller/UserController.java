@@ -274,7 +274,7 @@ public class UserController {
 	/*
 	 * Author can update a book created by him
 	 */
-	@PutMapping("/author/{author-id}/books/{book-id}")
+	@PutMapping("/author/{author-id}/updateBook/{book-id}")
 	@PreAuthorize("hasRole('AUTHOR')")
 	public ResponseEntity<?> updateABook(@RequestBody Book book, @PathVariable("author-id") Long authorId, @PathVariable("book-id") Long bookId) {
 		if (ObjectUtils.isEmpty(authorId))
@@ -282,12 +282,8 @@ public class UserController {
 		if (ObjectUtils.isEmpty(bookId))
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.BOOKID_INVALID));
 		
-		String uri = bookServiceHost + "/author/" + authorId + "/updateBook/" + bookId;
-
-		RestTemplate restTemplate = new RestTemplate();
-
-		MessageResponse result = restTemplate.postForObject(uri,book, MessageResponse.class);
-		return getResultResponseEntity(result);
+		
+		return getResultResponseEntity(userService.updateBook(authorId,bookId, book));
 	}
 	
 	/*

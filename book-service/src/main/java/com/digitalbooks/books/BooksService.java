@@ -88,7 +88,6 @@ public class BooksService {
 			existedBook.setCategory(book.getCategory());
 			existedBook.setContent(book.getContent());
 			existedBook.setPrice(book.getPrice());
-			existedBook.setPublishedDate(book.getPublishedDate());
 			existedBook.setPublisher(book.getPublisher());
 			existedBook.setTitle(book.getTitle());
 			existedBook.setLogo(book.getLogo());

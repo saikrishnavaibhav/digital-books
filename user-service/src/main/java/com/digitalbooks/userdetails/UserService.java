@@ -146,5 +146,14 @@ public class UserService {
 		ResponseEntity<?> result = restTemplate.getForEntity(uri, List.class);
 		return result;
 	}
+
+	public MessageResponse updateBook(Long authorId, Long bookId, Book book) {
+		String uri = bookServiceHost + "/author/" + authorId + "/updateBook/" + bookId;
+
+		RestTemplate restTemplate = new RestTemplate();
+
+		MessageResponse result = restTemplate.postForObject(uri,book, MessageResponse.class);
+		return result;
+	}
 	
 }

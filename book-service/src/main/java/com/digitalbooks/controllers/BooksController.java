@@ -173,26 +173,40 @@ public class BooksController {
 			return booksList;
 		
 		List<Book> books = booksService.getAuthorBooks(authorId);
-		return getBookResponses(books);
+		return getAuthorBooks(books);
 	}
 
+	private List<BookResponse> getAuthorBooks(List<Book> book) {
+		List<BookResponse> bookResponses = book.stream().map(book1 -> {
+			BookResponse bookResponse = new BookResponse();
+				bookResponse.setId(book1.getId());
+				bookResponse.setAuthorName(book1.getAuthorName());
+				bookResponse.setCategory(book1.getCategory());
+				bookResponse.setContent(book1.getContent());
+				bookResponse.setActive(book1.getActive());
+				
+				//set logo here
+				
+				bookResponse.setPrice(book1.getPrice());
+				bookResponse.setPublishedDate(book1.getPublishedDate());
+				bookResponse.setPublisher(book1.getPublisher());
+				bookResponse.setTitle(book1.getTitle());
+				return bookResponse;
+		}).collect(Collectors.toList());
+		
+		return bookResponses;
+	}
+	
 	private List<BookResponse> getBookResponses(List<Book> book) {
 		List<BookResponse> bookResponses = book.stream().filter(Book::getActive).map(book1 -> {
 			BookResponse bookResponse = new BookResponse();
 			bookResponse.setId(book1.getId());
-				bookResponse.setActive(book1.getActive());
-				bookResponse.setAuthorId(book1.getAuthorId());
 				bookResponse.setAuthorName(book1.getAuthorName());
 				bookResponse.setCategory(book1.getCategory());
 				bookResponse.setContent(book1.getContent());
 				
-//				String logo = ServletUriComponentsBuilder
-//				          .fromCurrentContextPath()
-//				          .path("/logos/")
-//				          .path(""+book1.getId())
-//				          .toUriString();
-//				
-//				bookResponse.setLogo(logo);
+				//set logo here
+				
 				bookResponse.setPrice(book1.getPrice());
 				bookResponse.setPublishedDate(book1.getPublishedDate());
 				bookResponse.setPublisher(book1.getPublisher());
