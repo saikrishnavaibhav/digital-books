@@ -43,15 +43,9 @@ export class BoardUserComponent implements OnInit {
     this.user = this.tokenStorageService.getUser();
     this.userService.getSubscribedBooks(this.user.id).subscribe(
       data => {
-        
-        console.log("books -> " + this.books);
         for(let b of data){
           this.book = b;
           this.books.push(this.book);
-        }
-        console.log("after adding books -> "+this.books);
-        for (let b of this.books){
-          console.log("book => "+b);
         }
       },
       error => {
