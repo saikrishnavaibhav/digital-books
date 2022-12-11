@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -83,7 +84,7 @@ public class UserService {
 			
 			subscription.setActive(false);
 			subscriptionRepository.save(subscription);
-			return ResponseEntity.ok(new MessageResponse("Cancelled to subscription successfully!"));
+			return ResponseEntity.ok(new MessageResponse("Cancelled subscription successfully!"));
 		}
 		return ResponseEntity.badRequest().body(new MessageResponse("Invalid Subscription"));
 	}
@@ -98,22 +99,30 @@ public class UserService {
 		
 		Optional<User> isUserPresent = userRepository.findById(subscription.getUserId());
 		if (isUserPresent.isPresent()) {
-			
-			String uri = bookServiceHost + "/book/" + bookId + "/checkBook";
-			
-			Boolean bookExist = false;
-			String value= restTemplate.getForObject(uri, String.class);
-			bookExist = "BookFound".equalsIgnoreCase(value) ? true : false;
-			if(bookExist) {
+			List<Subscription> subscriptionsList =subscriptionRepository.findByBookIdAndUserId(bookId, subscriptionRequest.getUserId());
+			Set<Subscription> activeSubscriptions = subscriptionsList.stream().filter(Subscription::isActive).collect(Collectors.toSet());
+			if(activeSubscriptions.isEmpty()) {
+				String uri = bookServiceHost + "/book/" + bookId + "/checkBook";
 				
-				User user = isUserPresent.get();
-				Set<Subscription> subscriptions = user.getSubscriptions();
-				subscriptions.add(subscription);
-				userRepository.save(user);
-				return ResponseEntity.ok(new MessageResponse("subscribed successfully"));
-			} else 
-				return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.BOOKID_INVALID));
-		
+				Boolean bookExist = false;
+				String value= restTemplate.getForObject(uri, String.class);
+				bookExist = "BookFound".equalsIgnoreCase(value) ? true : false;
+				if(bookExist) {
+					
+					User user = isUserPresent.get();
+					Set<Subscription> subscriptions = user.getSubscriptions();
+					subscriptions.add(subscription);
+					userRepository.save(user);
+					return ResponseEntity.ok(new MessageResponse("subscribed successfully"));
+				} else 
+					return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.BOOKID_INVALID));
+			} else {
+//				Subscription sub1 = sub.get();
+//				sub1.setActive(true);
+//				subscriptionRepository.save(sub1);
+//				
+				return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
+			}
 		} else 
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.USERID_INVALID));
 		
@@ -154,6 +163,16 @@ public class UserService {
 
 		MessageResponse result = restTemplate.postForObject(uri,book, MessageResponse.class);
 		return result;
+	}
+
+	public ResponseEntity<?> getUserDetails(Long id, String username) {
+		Optional<User> isUserPresent = userRepository.findById(id);
+		if(isUserPresent.isPresent() && username.equals(isUserPresent.get().getUserName())) {
+			User user = isUserPresent.get();
+			user.setSubscriptions(user.getSubscriptions().stream().filter(Subscription::isActive).collect(Collectors.toSet()));
+			return ResponseEntity.ok(isUserPresent.get());
+		}
+		return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 	}
 	
 }

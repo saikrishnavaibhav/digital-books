@@ -164,13 +164,14 @@ public class UserController {
 		List<String> roles = userDetails.getAuthorities().stream()
 				.map(GrantedAuthority::getAuthority)
 				.collect(Collectors.toList());
+		Set<Subscription> subscriptions = userDetails.getSubscriptions().stream().filter(Subscription::isActive).collect(Collectors.toSet());
 
 		return ResponseEntity.ok(new JwtResponse(jwt, 
 												 userDetails.getId(), 
 												 userDetails.getUsername(), 
 												 userDetails.getEmail(), 
 												 roles,
-												 userDetails.getSubscriptions()));
+												 subscriptions));
 	}
 	
 	/*
@@ -234,7 +235,7 @@ public class UserController {
 		
 		if(!subscriptionsList.isEmpty()) {
 			
-			List<Long> bookIds = subscriptionsList.stream().map(Subscription::getBookId).collect(Collectors.toList());
+			List<Long> bookIds = subscriptionsList.stream().filter(Subscription::isActive).map(Subscription::getBookId).collect(Collectors.toList());
 			
 			String uri = bookServiceHost + "/book/getSubscribedBooks";
 			
@@ -363,6 +364,24 @@ public class UserController {
 		List<Book> books = (List<Book>) result.getBody();
 		if(books.isEmpty()) return ResponseEntity.badRequest().body(new MessageResponse("Invalid request"));
 		return ResponseEntity.ok(books);
+		
+	}
+
+	/*
+	 * get user details
+	 */
+	@GetMapping("/readers/{user-id}")
+	public ResponseEntity<?> getUserDetails(@PathVariable("user-id") Long id, HttpServletRequest httpServletRequest){
+		if (id == null)
+			return ResponseEntity.badRequest().body(new MessageResponse("invalid request"));
+		
+		String jwt = jwtUtils.parseJwt(httpServletRequest);
+		if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+			String username = jwtUtils.getUserNameFromJwtToken(jwt);
+			return userService.getUserDetails(id, username);
+		} else {
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
+		}
 		
 	}
 }
