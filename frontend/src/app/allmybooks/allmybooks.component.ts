@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthorService } from '../_services/author.service';
 import { BookstorageService } from '../_services/bookstorage.service';
 import { TokenStorageService } from '../_services/token-storage.service';
-import { UserService } from '../_services/user.service';
 
 @Component({
   selector: 'app-allmybooks',
@@ -12,8 +12,8 @@ export class AllmybooksComponent implements OnInit {
 
   user: any = {
     id: null,
-    userName: null,
-    emailId: null,
+    username: null,
+    emailid: null,
     phoneNumber: null,
     roles :null,
     subscriptions:null
@@ -35,12 +35,11 @@ export class AllmybooksComponent implements OnInit {
     active: null
   }
 
-  constructor(private userService: UserService, private tokenStorageService: TokenStorageService, private bookService: BookstorageService) { }
+  constructor(private authorService: AuthorService, private tokenStorageService: TokenStorageService, private bookService: BookstorageService) { }
 
   ngOnInit(): void {
     this.user = this.tokenStorageService.getUser();
-
-    this.userService.getBooksCreatedByAuthor(this.user.id).subscribe(
+    this.authorService.getBooksCreatedByAuthor(this.user.id).subscribe(
       data  => {
         for(let b of data){
           this.book = b;
@@ -58,4 +57,29 @@ export class AllmybooksComponent implements OnInit {
     this.bookService.setBook(book);
   }
 
+  onBlock(bookId : any) : void {
+    console.log("blocking : " + bookId);
+    this.blockBook(bookId,"yes");
+  }
+
+  onUnblock(bookId : any) : void {
+    console.log("unblocking : "+bookId);
+    this.blockBook(bookId,"no");
+  }
+
+  blockBook(bookId:any, block:any){
+    this.authorService.blockBook(bookId, block).subscribe(
+      data=>{
+        console.log(data);
+        window.location.reload();
+      },
+      error=>{
+        console.error(error);
+      }
+    );
+  }
+
+  onUpdate(book : any) : void {
+    this.bookService.setBook(book);
+  }
 }

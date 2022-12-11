@@ -9,6 +9,7 @@ import { BoardUserComponent } from './board-user/board-user.component';
 import { CreatebookComponent } from './createbook/createbook.component';
 import { AllmybooksComponent } from './allmybooks/allmybooks.component';
 import { BookdetailsComponent } from './bookdetails/bookdetails.component';
+import { UpdatebookComponent } from './updatebook/updatebook.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -19,6 +20,7 @@ const routes: Routes = [
   { path: 'createBook', component: CreatebookComponent },
   { path: 'allMybooks', component: AllmybooksComponent },
   { path: 'book/:Id', component: BookdetailsComponent },
+  { path: 'updateBook', component: UpdatebookComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];
 

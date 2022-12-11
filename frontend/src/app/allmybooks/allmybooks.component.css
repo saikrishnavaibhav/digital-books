@@ -17,3 +17,17 @@
     text-align: center;
     align-items: center;
 }
+
+.book-edit-container{
+    width: 100%;
+    align-content: flex;
+}
+
+button{
+    width: 40%;
+    border-radius: 2px;
+    color: black;
+    background-color: rgb(174, 179, 218);
+    border: none;
+    margin-left: 10px;
+}

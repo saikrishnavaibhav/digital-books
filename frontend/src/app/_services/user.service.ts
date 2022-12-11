@@ -34,7 +34,5 @@ export class UserService {
   getSubscribedBook(id: any) : Observable<any> { 
     return this.http.get(API_URL + '/readers/'+id+'/books');
   }
-  getBooksCreatedByAuthor(id: any) : Observable<any> {
-    return this.http.get(API_URL + '/authors/'+id+'/getAllBooks');
-  }
+  
 }

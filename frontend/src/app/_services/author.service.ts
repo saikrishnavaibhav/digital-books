@@ -14,13 +14,27 @@ const httpOptions = {
 })
 export class AuthorService {
   
+  
   constructor(private http: HttpClient, private tokenService: TokenStorageService) { }
 
+  user = this.tokenService.getUser();
+
   createBook(book: any) : Observable<any> {
-    let user = this.tokenService.getUser();
-    console.log(user);
-    console.log(user.id);
-    return this.http.post(API_URL +"/author/"+user.id+"/books",book,httpOptions);
+    //let user = this.tokenService.getUser();
+    return this.http.post(API_URL +"/author/"+this.user.id+"/books",book,httpOptions);
   }
 
+  updateBook(book: any) : Observable<any> {
+    return this.http.put(API_URL +"/author/"+this.user.id+"/updateBook/"+book.id,book,httpOptions);
+  }
+
+  getBooksCreatedByAuthor(id: any) : Observable<any> {
+    return this.http.get(API_URL + '/authors/'+id+'/getAllBooks');
+  }
+
+  blockBook(bookId: any, block: any) {
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append("block",block)
+    return this.http.post(API_URL +"/author/"+this.user.id+"/books/"+bookId, null,{params:queryParams});
+  }
 }
