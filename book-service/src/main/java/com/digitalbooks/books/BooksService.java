@@ -114,4 +114,11 @@ public class BooksService {
 		System.out.println(books);
 		return books;
 	}
+
+	public List<Book> getAuthorBooks(Long authorId) {
+		List<Book> books = new ArrayList<>();
+		books = bookRespository.findAllByAuthorId(authorId);
+		System.out.println(books);
+		return books;
+	}
 }

@@ -15,6 +15,8 @@ public interface BookRespository extends JpaRepository<Book, Long>{
 	
 	Boolean existsByAuthorIdAndId(Long authorId, Long id );
 	
+	List<Book> findAllByAuthorId(Long authorId);
+	
 	@Query("select books from Book books where books.category = :category and books.title= :title and books.authorName=:author and books.price< :price and books.publisher= :publisher")
 	List<Book> findBooksByCategoryAndTitleAndAuthorAndPriceAndPublisher(String category, String title, String author, Long price, String publisher);
 }

@@ -160,6 +160,21 @@ public class BooksController {
 		List<Book> books = booksService.searchBooks(category, title, author, price, publisher);
 		return getBookResponses(books);
 	}
+	
+	
+	/*
+	 * Anyone can search books
+	 */
+	@GetMapping("/author/{author-id}/getAuthorBooks")
+	public List<BookResponse> getAllAuthorBooks(@PathVariable("author-id") Long authorId) {
+		
+		List<BookResponse> booksList = new ArrayList<>();
+		if(ObjectUtils.isEmpty(authorId))
+			return booksList;
+		
+		List<Book> books = booksService.getAuthorBooks(authorId);
+		return getBookResponses(books);
+	}
 
 	private List<BookResponse> getBookResponses(List<Book> book) {
 		List<BookResponse> bookResponses = book.stream().filter(Book::getActive).map(book1 -> {
@@ -171,13 +186,13 @@ public class BooksController {
 				bookResponse.setCategory(book1.getCategory());
 				bookResponse.setContent(book1.getContent());
 				
-				String logo = ServletUriComponentsBuilder
-				          .fromCurrentContextPath()
-				          .path("/logos/")
-				          .path(""+book1.getId())
-				          .toUriString();
-				
-				bookResponse.setLogo(logo);
+//				String logo = ServletUriComponentsBuilder
+//				          .fromCurrentContextPath()
+//				          .path("/logos/")
+//				          .path(""+book1.getId())
+//				          .toUriString();
+//				
+//				bookResponse.setLogo(logo);
 				bookResponse.setPrice(book1.getPrice());
 				bookResponse.setPublishedDate(book1.getPublishedDate());
 				bookResponse.setPublisher(book1.getPublisher());

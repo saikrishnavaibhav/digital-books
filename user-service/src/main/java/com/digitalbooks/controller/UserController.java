@@ -289,6 +289,18 @@ public class UserController {
 		MessageResponse result = restTemplate.postForObject(uri,book, MessageResponse.class);
 		return getResultResponseEntity(result);
 	}
+	
+	/*
+	 * Author can fetch all books created by him
+	 */
+	@GetMapping("/authors/{author-id}/getAllBooks")
+	@PreAuthorize("hasRole('AUTHOR')")
+	public ResponseEntity<?> getAuthorBooks(@PathVariable("author-id") Long authorId) {
+		if (ObjectUtils.isEmpty(authorId))
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.AUTHORID_INVALID));
+		
+		return userService.getAuthorBooks(authorId);
+	}
 
 	/*
 	 * Reader can cancel subscription before 24 hrs

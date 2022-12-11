@@ -1,6 +1,7 @@
 package com.digitalbooks.userdetails;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -135,6 +136,15 @@ public class UserService {
 		}
 		
 		return ResponseEntity.badRequest().body(new MessageResponse("invalid request"));
+	}
+
+	public ResponseEntity<?> getAuthorBooks(Long authorId) {
+		String uri = bookServiceHost + "/author/" + authorId + "/getAuthorBooks";
+
+		RestTemplate restTemplate = new RestTemplate();
+
+		ResponseEntity<?> result = restTemplate.getForEntity(uri, List.class);
+		return result;
 	}
 	
 }
