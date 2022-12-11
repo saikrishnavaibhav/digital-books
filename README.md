@@ -24,4 +24,10 @@ changed logo to multipartfile in request and to bytes in DB, worked on unit test
 resolved unit test failures and added more test cases
 
 08-12-2022
-working on sonarqube fixes
+worked on sonarqube fixes and added front-end service to digital-books
+
+09-10-2022
+worked on sign-in, sign-up and search book functionalities from front end
+
+10-10-2022
+worked on viewing book details and subscriptions by user, create book by author.
