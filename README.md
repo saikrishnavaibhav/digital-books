@@ -30,4 +30,7 @@ worked on sonarqube fixes and added front-end service to digital-books
 worked on sign-in, sign-up and search book functionalities from front end
 
 10-10-2022
-worked on viewing book details and subscriptions by user, create book by author.
+worked on viewing book details and subscriptions by user, create book by author from front-end
+
+11-10-2022
+worked on update/block/unblock book by author and subscribe/unsubscribe to a book by user from front-end
