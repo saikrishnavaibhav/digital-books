@@ -32,11 +32,13 @@ public class BooksController {
 	@Autowired
 	BookRespository bookRespository;
 	
+	static final String INVALID_BOOKID= "Invalid book id";
+	
 	/*
 	 * Author can create a book
 	 */
 	@PostMapping("/author/{author-id}/createBook")
-	public ResponseEntity<?> createBook(@RequestBody Book book, @PathVariable("author-id") Long id) throws Exception, IllegalArgumentException{
+	public ResponseEntity<?> createBook(@RequestBody Book book, @PathVariable("author-id") Long id) {
 		if(id == null)
 			return ResponseEntity.badRequest().body("Invalid author Id");
 		book.setAuthorId(id);
@@ -52,7 +54,7 @@ public class BooksController {
 	@GetMapping("/book/{book-id}/getSubscribedBook")
 	public ResponseEntity<?> getSubscribedBook(@PathVariable("book-id") Long bookId){
 		if(bookId == null)
-			return ResponseEntity.badRequest().body("Invalid book id");
+			return ResponseEntity.badRequest().body(INVALID_BOOKID);
 		Book book = booksService.getBook(bookId);
 		if(book == null || !book.getActive())
 			return ResponseEntity.badRequest().body(new MessageResponse("Book not found!"));
@@ -101,7 +103,7 @@ public class BooksController {
 		if(authorId == null)
 			return new MessageResponse("Invalid author id");
 		if(bookId == null)
-			return new MessageResponse("Invalid book id");
+			return new MessageResponse(INVALID_BOOKID);
 		if (booksService.blockBook(authorId, bookId, block)) return new MessageResponse("Book updated successfully");
 		return new MessageResponse("Book updation failed");
 	}
@@ -115,7 +117,7 @@ public class BooksController {
 		if(authorId == null)
 			return new MessageResponse("Invalid author id");
 		if(bookId == null)
-			return new MessageResponse("Invalid book id");
+			return new MessageResponse(INVALID_BOOKID);
 		if(booksService.updateBook(book, bookId, authorId)) {
 			return new MessageResponse("Book updated Successfully");
 		}
@@ -130,7 +132,7 @@ public class BooksController {
 	public MessageResponse readBook(@PathVariable("book-id") Long bookId) {
 		
 		if(bookId == null)
-			return new MessageResponse("Invalid book id");
+			return new MessageResponse(INVALID_BOOKID);
 		return booksService.readBook(bookId);
 	}
 	
@@ -143,7 +145,7 @@ public class BooksController {
 		
 		if(bookId == null)
 			return "Invalid BookId";
-		return bookRespository.existsById(bookId) ? "BookFound" : "Invalid BookId";
+		return bookRespository.existsById(bookId) ? "BookFound" : INVALID_BOOKID;
 	}
 	
 	/*
@@ -177,7 +179,7 @@ public class BooksController {
 	}
 
 	private List<BookResponse> getAuthorBooks(List<Book> book) {
-		List<BookResponse> bookResponses = book.stream().map(book1 -> {
+		return book.stream().map(book1 -> {
 			BookResponse bookResponse = new BookResponse();
 				bookResponse.setId(book1.getId());
 				bookResponse.setAuthorName(book1.getAuthorName());
@@ -194,11 +196,10 @@ public class BooksController {
 				return bookResponse;
 		}).collect(Collectors.toList());
 		
-		return bookResponses;
 	}
 	
 	private List<BookResponse> getBookResponses(List<Book> book) {
-		List<BookResponse> bookResponses = book.stream().filter(Book::getActive).map(book1 -> {
+		return book.stream().filter(Book::getActive).map(book1 -> {
 			BookResponse bookResponse = new BookResponse();
 			bookResponse.setId(book1.getId());
 				bookResponse.setAuthorName(book1.getAuthorName());
@@ -214,6 +215,5 @@ public class BooksController {
 				return bookResponse;
 		}).collect(Collectors.toList());
 		
-		return bookResponses;
 	}
 }

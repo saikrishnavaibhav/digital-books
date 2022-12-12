@@ -1,10 +1,11 @@
 package com.digitalbooks.books;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -19,10 +20,12 @@ public class BooksService {
 	@Autowired
 	BookRespository bookRespository;
 	
+	private static final Logger logger = LoggerFactory.getLogger(BooksService.class);
+	
 	public MessageResponse saveBook(Book book, Long authorId) {
 		
 		try {
-			if(bookRespository.existsByAuthorIdAndTitle(authorId, book.getTitle())) {
+			if(Boolean.TRUE.equals(bookRespository.existsByAuthorIdAndTitle(authorId, book.getTitle()))) {
 				return new MessageResponse("Book with same title exists!");
 			}
 			bookRespository.save(book);
@@ -35,6 +38,7 @@ public class BooksService {
 	
 	public List<Book> getBooks(){
 		List<Book> books = bookRespository.findAll();
+		logger.info("retrieved books : {}", books);
 		return books;
 	}
 	
@@ -49,31 +53,21 @@ public class BooksService {
 	
 	public List<Book> getAllSubscribedBooks(List<Long> bookIds){
 		
-		List<Book> booksList = new ArrayList<>();
 		List<Book> allSubscribedBooks  = bookRespository.findAllById(bookIds);
-		booksList = allSubscribedBooks.stream().filter(Book::getActive).collect(Collectors.toList());
-			
-		return booksList;
+		return allSubscribedBooks.stream().filter(Book::getActive).collect(Collectors.toList());
 		
 	}
 
 	public boolean blockBook(Long authorId, Long bookId, boolean block) {
-		if(bookRespository.existsByAuthorIdAndId(authorId, bookId)) {
+		if(Boolean.TRUE.equals(bookRespository.existsByAuthorIdAndId(authorId, bookId))) {
 			Book book = getBook(bookId);
-			System.out.println();
-			System.out.println("initial book: " + book);
-			System.out.println();
 			if(book.getActive() != block)
 				return false;
-			
 			book.setActive(!block);
-			System.out.println();
-			System.out.println("mid book: " + book);
-			System.out.println();
-			
+
 			Book book1 = bookRespository.save(book);
-			System.out.println("final book: " + book1);
 			if(book1.getActive() != block) {
+				logger.info("book updated to active status: {}", block);
 				return true;
 			} else 
 				return false;
@@ -83,7 +77,7 @@ public class BooksService {
 	}
 
 	public boolean updateBook(Book book, Long bookId, Long authorId) {
-		if(bookRespository.existsByAuthorIdAndId(authorId, bookId)) {
+		if(Boolean.TRUE.equals(bookRespository.existsByAuthorIdAndId(authorId, bookId))) {
 			Book existedBook = getBook(bookId);
 			existedBook.setCategory(book.getCategory());
 			existedBook.setContent(book.getContent());
@@ -110,14 +104,13 @@ public class BooksService {
 
 	public List<Book> searchBooks(String category, String title, String author, Long price, String publisher) {
 		List<Book> books = bookRespository.findBooksByCategoryAndTitleAndAuthorAndPriceAndPublisher(category, title, author, price, publisher);
-		System.out.println(books);
+		logger.info("books from search: {}",books);
 		return books;
 	}
 
 	public List<Book> getAuthorBooks(Long authorId) {
-		List<Book> books = new ArrayList<>();
-		books = bookRespository.findAllByAuthorId(authorId);
-		System.out.println(books);
+		List<Book> books = bookRespository.findAllByAuthorId(authorId);
+		logger.info("books of author: {}",books);
 		return books;
 	}
 }

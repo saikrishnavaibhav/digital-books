@@ -27,26 +27,14 @@ public class BookResponse {
 
 	private boolean active;
 
-	public BookResponse() {
-		
+	public String getLogo() {
+		return logo;
 	}
 	
-	public BookResponse(Long id, String logo, String title, String category, Long price, Long authorId, String authorName,
-			String publisher, Date publishedDate, String content, boolean active) {
-		super();
-		this.id = id;
+	public void setLogo(String logo) {
 		this.logo = logo;
-		this.title = title;
-		this.category = category;
-		this.price = price;
-		this.authorId = authorId;
-		this.authorName = authorName;
-		this.publisher = publisher;
-		this.publishedDate = publishedDate;
-		this.content = content;
-		this.active = active;
 	}
-
+	
 	public Long getId() {
 		return id;
 	}
@@ -55,12 +43,12 @@ public class BookResponse {
 		this.id = id;
 	}
 
-	public String getLogo() {
-		return logo;
+	public String getCategory() {
+		return category;
 	}
-
-	public void setLogo(String logo) {
-		this.logo = logo;
+	
+	public void setCategory(String value) {
+		this.category = value;
 	}
 
 	public String getTitle() {
@@ -71,12 +59,12 @@ public class BookResponse {
 		this.title = value;
 	}
 
-	public String getCategory() {
-		return category;
+	public Long getAuthorId() {
+		return authorId;
 	}
-
-	public void setCategory(String value) {
-		this.category = value;
+	
+	public void setAuthorId(Long authorId) {
+		this.authorId = authorId;
 	}
 
 	public Long getPrice() {
@@ -87,20 +75,20 @@ public class BookResponse {
 		this.price = price;
 	}
 
-	public Long getAuthorId() {
-		return authorId;
-	}
-
-	public void setAuthorId(Long authorId) {
-		this.authorId = authorId;
-	}
-
 	public String getAuthorName() {
 		return authorName;
 	}
 
 	public void setAuthorName(String authorName) {
 		this.authorName = authorName;
+	}
+
+	public Date getPublishedDate() {
+		return publishedDate;
+	}
+	
+	public void setPublishedDate(Date publishedDate) {
+		this.publishedDate = publishedDate;
 	}
 
 	public String getPublisher() {
@@ -111,12 +99,12 @@ public class BookResponse {
 		this.publisher = value;
 	}
 
-	public Date getPublishedDate() {
-		return publishedDate;
+	public boolean getActive() {
+		return active;
 	}
-
-	public void setPublishedDate(Date publishedDate) {
-		this.publishedDate = publishedDate;
+	
+	public void setActive(boolean value) {
+		this.active = value;
 	}
 
 	public String getContent() {
@@ -127,17 +115,9 @@ public class BookResponse {
 		this.content = value;
 	}
 
-	public boolean getActive() {
-		return active;
-	}
-
-	public void setActive(boolean value) {
-		this.active = value;
-	}
-
 	@Override
 	public int hashCode() {
-		return Objects.hash(active, authorId, authorName, category, content, id, logo, price, publishedDate, publisher,
+		return Objects.hash(id, active, authorId, authorName, category, content, logo, price, publishedDate, publisher,
 				title);
 	}
 
