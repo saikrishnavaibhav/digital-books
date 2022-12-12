@@ -1,5 +1,6 @@
 package com.digitalbooks.requests;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 
@@ -31,24 +32,22 @@ public class Book {
 	@NotNull
 	private Long price;
 	
-	//@NotBlank
-	private int authorId;
-	
 
 	private String authorName;
+	
+	private int authorId;
+
+	private Date publishedDate;
 	
 	@NotBlank
 	@Size(min = 3, max = 20)
 	private String publisher;
 	
-	//@NotBlank
-	private Date publishedDate;
+	private boolean active;
 	
 	@NotBlank
 	@Size(min = 50, max = 2000)
 	private String content;
-	
-	private boolean active;
 
 	public int getId() {
 		return id;
@@ -57,7 +56,7 @@ public class Book {
 	public void setId(int id) {
 		this.id = id;
 	}
-	
+
 	public byte[] getLogo() {
 		return logo;
 	}
@@ -70,32 +69,24 @@ public class Book {
 		return title;
 	}
 
-	public void setTitle(String value) {
-		this.title = value;
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 	public String getCategory() {
 		return category;
 	}
 
-	public void setCategory(String value) {
-		this.category = value;
+	public void setCategory(String category) {
+		this.category = category;
 	}
-	
+
 	public Long getPrice() {
 		return price;
 	}
 
 	public void setPrice(Long price) {
 		this.price = price;
-	}
-
-	public int getAuthorId() {
-		return authorId;
-	}
-
-	public void setAuthorId(int authorId) {
-		this.authorId = authorId;
 	}
 
 	public String getAuthorName() {
@@ -106,12 +97,12 @@ public class Book {
 		this.authorName = authorName;
 	}
 
-	public String getPublisher() {
-		return publisher;
+	public int getAuthorId() {
+		return authorId;
 	}
 
-	public void setPublisher(String value) {
-		this.publisher = value;
+	public void setAuthorId(int authorId) {
+		this.authorId = authorId;
 	}
 
 	public Date getPublishedDate() {
@@ -122,26 +113,38 @@ public class Book {
 		this.publishedDate = publishedDate;
 	}
 
+	public String getPublisher() {
+		return publisher;
+	}
+
+	public void setPublisher(String publisher) {
+		this.publisher = publisher;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
 	public String getContent() {
 		return content;
 	}
 
-	public void setContent(String value) {
-		this.content = value;
-	}
-
-	public boolean getActive() {
-		return active;
-	}
-
-	public void setActive(boolean value) {
-		this.active = value;
+	public void setContent(String content) {
+		this.content = content;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(active, authorId, authorName, category, content, id, logo, price, publishedDate, publisher,
-				title);
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(logo);
+		result = prime * result + Objects.hash(active, authorId, authorName, category, content, id, price,
+				publishedDate, publisher, title);
+		return result;
 	}
 
 	@Override
@@ -155,16 +158,16 @@ public class Book {
 		Book other = (Book) obj;
 		return active == other.active && authorId == other.authorId && Objects.equals(authorName, other.authorName)
 				&& Objects.equals(category, other.category) && Objects.equals(content, other.content) && id == other.id
-				&& Objects.equals(logo, other.logo) && Objects.equals(price, other.price)
+				&& Arrays.equals(logo, other.logo) && Objects.equals(price, other.price)
 				&& Objects.equals(publishedDate, other.publishedDate) && Objects.equals(publisher, other.publisher)
 				&& Objects.equals(title, other.title);
 	}
 
 	@Override
 	public String toString() {
-		return "Book [id=" + id + ", logo=" + logo + ", title=" + title + ", category=" + category + ", price=" + price
-				+ ", authorId=" + authorId + ", authorName=" + authorName + ", publisher=" + publisher
-				+ ", publishedDate=" + publishedDate + ", content=" + content + ", active=" + active + "]";
+		return "Book [id=" + id + ", logo=" + Arrays.toString(logo) + ", title=" + title + ", category=" + category
+				+ ", price=" + price + ", authorName=" + authorName + ", authorId=" + authorId + ", publishedDate="
+				+ publishedDate + ", publisher=" + publisher + ", active=" + active + ", content=" + content + "]";
 	}
 
 }

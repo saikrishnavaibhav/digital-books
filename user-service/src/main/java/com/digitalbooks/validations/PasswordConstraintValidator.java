@@ -20,10 +20,6 @@ import org.passay.WhitespaceRule;
 public class PasswordConstraintValidator implements ConstraintValidator<ValidPassword, String> {
 
     @Override
-    public void initialize(ValidPassword arg0) {
-    }
-
-    @Override
     public boolean isValid(String password, ConstraintValidatorContext context) {
         PasswordValidator validator = new PasswordValidator(Arrays.asList(
            new LengthRule(8, 30), 

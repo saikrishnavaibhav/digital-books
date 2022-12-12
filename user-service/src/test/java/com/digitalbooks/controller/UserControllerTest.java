@@ -41,12 +41,11 @@ import com.digitalbooks.repositories.SubscriptionRepository;
 import com.digitalbooks.repositories.UserRepository;
 import com.digitalbooks.responses.BookResponse;
 import com.digitalbooks.userdetails.UserService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK, classes = { DigitalbooksUserApplication.class })
 @WebAppConfiguration
-public class UserControllerTest {
+class UserControllerTest {
 
 	@Autowired
 	private WebApplicationContext webApplicationContext;
@@ -67,7 +66,7 @@ public class UserControllerTest {
 
 	private MockRestServiceServer mockServer;
 	
-	private ObjectMapper mapper = new ObjectMapper();
+
 	
 	@BeforeEach
 	public void setup() throws Exception {
@@ -78,7 +77,7 @@ public class UserControllerTest {
 	}
 	
 	@Test
-	public void testRegisterUser() throws Exception {
+	void testRegisterUser() throws Exception {
 		
 		when(userRepository.save(any())).thenReturn(null);
 		
@@ -97,7 +96,7 @@ public class UserControllerTest {
 	}
 
 	@Test
-	public void testRegisterUserAsReader() throws Exception {
+	void testRegisterUserAsReader() throws Exception {
 		when(userRepository.save(any())).thenReturn(null);
 		
 		mockMvc.perform(post("/api/v1/digitalbooks/sign-up")
@@ -117,7 +116,7 @@ public class UserControllerTest {
 	}
 	
 	@Test
-	public void testRegisterUserAsAuthor() throws Exception {
+	void testRegisterUserAsAuthor() throws Exception {
 		when(userRepository.save(any())).thenReturn(null);
 		
 		mockMvc.perform(post("/api/v1/digitalbooks/sign-up")
@@ -137,7 +136,7 @@ public class UserControllerTest {
 	}
 	
 	@Test
-	public void testRegisterUserForExistingUserName() throws Exception {
+	void testRegisterUserForExistingUserName() throws Exception {
 		
 		when(userRepository.existsByUserName(any())).thenReturn(true);
 		
@@ -156,7 +155,7 @@ public class UserControllerTest {
 	}
 	
 	@Test
-	public void testRegisterUserForExistingEmailId() throws Exception {
+	void testRegisterUserForExistingEmailId() throws Exception {
 		
 		when(userRepository.existsByEmailId(any())).thenReturn(true);
 		
@@ -175,7 +174,7 @@ public class UserControllerTest {
 	}
 	
 	@Test
-	public void testRegisterUserForExistingPhoneNumber() throws Exception {
+	void testRegisterUserForExistingPhoneNumber() throws Exception {
 		
 		when(userRepository.existsByPhoneNumber(any())).thenReturn(true);
 		
@@ -192,26 +191,10 @@ public class UserControllerTest {
 				   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				   .andExpect(jsonPath("$.message").value("Error: PhoneNumber is already in use!"));
 	}
-	
-	public void testAuthenticateUser() throws Exception {
-		
-//		when(userRepository.save(any())).thenReturn(null);
-//		
-//		mockMvc.perform(post("/api/v1/digitalbooks/sign-up")
-//				   .contentType(MediaType.APPLICATION_JSON)
-//				   .content("{\r\n"
-//				   		+ "    \"userName\": \"robin\",\r\n"
-//				   		+ "    \"password\": \"Password@123\"\r\n"
-//				   		+ "}")						
-//				   .accept(MediaType.APPLICATION_JSON))
-//				   .andExpect(status().isOk())
-//				   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-//				   .andExpect(jsonPath("$.message").value("User registered successfully!"));
-	}
 
 	@WithMockUser(roles="READER")
 	@Test
-	public void testSusbcribeABook() throws Exception {
+	void testSusbcribeABook() throws Exception {
 	
 		Optional<User> user = Optional.ofNullable(new User());
 		when(userRepository.findById(any())).thenReturn(user);

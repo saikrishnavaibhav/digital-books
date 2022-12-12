@@ -10,4 +10,7 @@ public class UserUtils {
 	public static final String USERID_INVALID = "userId is not valid";
 	public static final String AUTHORID_INVALID = "Author id is not valid";
 	
+	private UserUtils() {
+	}
+	
 }

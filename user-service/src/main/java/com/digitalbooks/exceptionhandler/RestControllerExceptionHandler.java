@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
 
+import com.digitalbooks.utils.UserUtils;
+
 @RestControllerAdvice
 public class RestControllerExceptionHandler {
 	
@@ -39,7 +41,15 @@ public class RestControllerExceptionHandler {
     @ExceptionHandler(HttpClientErrorException.class)
     public ResponseEntity<String> handleHttpClientErrorException(HttpClientErrorException exception) {
 		log.error(exception.getMessage());
-        return ResponseEntity.badRequest().body(exception.getMessage().split(" : ")[1]);
+		String message = UserUtils.INVALID_REQUEST;
+		if(exception.getMessage() == null)
+			return ResponseEntity.badRequest().body(message);
+		message = exception.getMessage();
+		if(message != null) 
+			return ResponseEntity.badRequest().body(message.split(" : ")[1]);
+		else
+			return ResponseEntity.badRequest().body(UserUtils.INVALID_REQUEST);
+        
     }
 	
 	@ResponseStatus(HttpStatus.BAD_REQUEST) 

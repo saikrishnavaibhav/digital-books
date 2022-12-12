@@ -1,6 +1,5 @@
 package com.digitalbooks.securityconfig;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,23 +22,16 @@ import com.digitalbooks.userdetails.UserDetailsServiceImpl;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(
 		prePostEnabled = true
-		//,securedEnabled = true, jsr250Enabled = true
 		)
 public class WebSecurityConfig {
 
-	@Autowired
-	private AuthEntryPointJwt unauthorizedHandler;
-	
-	@Autowired
-	UserDetailsServiceImpl userDetailsService;
-	
 	@Bean
 	public AuthTokenFilter authenticationJwtTokenFilter() {
 		return new AuthTokenFilter();
 	}
 	
 	@Bean
-	public AuthenticationManager authManager(HttpSecurity http, BCryptPasswordEncoder bCryptPasswordEncoder) 
+	public AuthenticationManager authManager(HttpSecurity http, BCryptPasswordEncoder bCryptPasswordEncoder, UserDetailsServiceImpl userDetailsService) 
 	  throws Exception {
 	    return http.getSharedObject(AuthenticationManagerBuilder.class)
 	      .userDetailsService(userDetailsService)
@@ -54,7 +46,7 @@ public class WebSecurityConfig {
 	}
 	
 	@Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, AuthEntryPointJwt unauthorizedHandler) throws Exception {
 		
 		http.cors().and().csrf().disable()
 		.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()

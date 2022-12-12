@@ -1,6 +1,5 @@
 package com.digitalbooks.controller;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,7 +32,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.digitalbooks.entities.Role;
 import com.digitalbooks.entities.Roles;
@@ -179,7 +177,7 @@ public class UserController {
 	 */
 	@PostMapping("/author/{author-id}/books")
 	@PreAuthorize("hasRole('AUTHOR')")
-	public ResponseEntity<MessageResponse> createABook(HttpServletRequest request, @RequestBody Book book, @PathVariable("author-id") Long id) throws IOException, ResponseStatusException {
+	public ResponseEntity<MessageResponse> createABook(HttpServletRequest request, @RequestBody Book book, @PathVariable("author-id") Long id) {
 		if (ObjectUtils.isEmpty(id))
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.AUTHORID_INVALID));
 		
@@ -259,8 +257,6 @@ public class UserController {
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.BOOKID_INVALID));
 		
 		String uri = bookServiceHost + "/author/" + authorId + "/blockBook/" + bookId +"?block=" + block;
-
-		RestTemplate restTemplate = new RestTemplate();
 
 		MessageResponse result = restTemplate.getForObject(uri, MessageResponse.class);
 		return getResultResponseEntity(result);
@@ -359,10 +355,10 @@ public class UserController {
 			
 		restTemplate = new RestTemplate();
 		ResponseEntity<?> result = restTemplate.getForEntity(uri, List.class);
-		if(result == null)
+		if(result.getBody() == null)
 			return ResponseEntity.badRequest().body(new MessageResponse("Bad Request"));
 		List<Book> books = (List<Book>) result.getBody();
-		if(books.isEmpty()) return ResponseEntity.badRequest().body(new MessageResponse("Invalid request"));
+		if(books == null || books.isEmpty()) return ResponseEntity.badRequest().body(new MessageResponse("Invalid request"));
 		return ResponseEntity.ok(books);
 		
 	}

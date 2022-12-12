@@ -34,7 +34,7 @@ import com.digitalbooks.responses.MessageResponse;
 
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
+class UserServiceTest {
 
 	@Mock
     private RestTemplate restTemplate;
@@ -69,7 +69,7 @@ public class UserServiceTest {
 	}
 
 	@Test
-	public void testCancelSubscription() {
+	void testCancelSubscription() {
 		Optional<User> user1 = Optional.ofNullable(new User());
 		Set<Subscription> subs = new HashSet<>();
 		Subscription sub = getSubscripton();
@@ -86,7 +86,7 @@ public class UserServiceTest {
 	}
 	
 	@Test
-	public void testCancelSubscriptionAfter24hours() {
+	void testCancelSubscriptionAfter24hours() {
 				
 		Optional<User> user1 = Optional.ofNullable(new User());
 		Set<Subscription> subs = new HashSet<>();
@@ -101,7 +101,7 @@ public class UserServiceTest {
 	}
 	
 	@Test
-	public void testCancelSubscriptionError() {
+	void testCancelSubscriptionError() {
 		Optional<User> user = Optional.ofNullable(new User());
 		when(userRepository.findById(any())).thenReturn(user);
 		
@@ -175,7 +175,7 @@ public class UserServiceTest {
 //	}
 
 	@Test
-	public void testFetchSubscribedBook() {
+	void testFetchSubscribedBook() {
 		Subscription subscription = getSubscripton();
 		when(userRepository.findById(anyLong())).thenReturn(getUser());
 		String uri = bookServiceHost + "/book/" + subscription.getBookId() + "/getSubscribedBook";
@@ -188,7 +188,7 @@ public class UserServiceTest {
 	}
 	
 	@Test
-	public void testFetchSubscribedBookForError() {
+	void testFetchSubscribedBookForError() {
 		Subscription subscription = getSubscripton();
 		ResponseEntity<?> res = userService.fetchSubscribedBook(subscription.getUserId(), subscription.getId());
 		 assertEquals(HttpStatus.BAD_REQUEST, res.getStatusCode());
@@ -216,11 +216,11 @@ public class UserServiceTest {
 
 	private SubscriptionRequest getSubscriptonRequest() {
 		SubscriptionRequest sub = new SubscriptionRequest();
-		sub.setActive(true);
-		sub.setBookId(4L);
-		sub.setId(4L);
-		sub.setSubscriptionTime("2022-11-01 16:19:00.100");
-		sub.setUserId(3L);
+//		sub.setActive(true);
+//		sub.setBookId(4L);
+//		sub.setId(4L);
+//		sub.setSubscriptionTime("2022-11-01 16:19:00.100");
+//		sub.setUserId(3L);
 		return sub;
 	}
 }

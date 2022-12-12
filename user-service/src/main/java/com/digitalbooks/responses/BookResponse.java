@@ -27,26 +27,6 @@ public class BookResponse {
 
 	private boolean active;
 
-	public BookResponse() {
-		
-	}
-	
-	public BookResponse(Long id, String logo, String title, String category, Long price, Long authorId, String authorName,
-			String publisher, Date publishedDate, String content, boolean active) {
-		super();
-		this.id = id;
-		this.logo = logo;
-		this.title = title;
-		this.category = category;
-		this.price = price;
-		this.authorId = authorId;
-		this.authorName = authorName;
-		this.publisher = publisher;
-		this.publishedDate = publishedDate;
-		this.content = content;
-		this.active = active;
-	}
-
 	public Long getId() {
 		return id;
 	}

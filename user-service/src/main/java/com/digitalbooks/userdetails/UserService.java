@@ -42,6 +42,8 @@ public class UserService {
 	
 	@Autowired
 	JwtUtils jwtUtils;
+	
+	String author = "/author/";
 
 	@Cacheable(value = "subscription")
 	public Subscription getSubscription(Long userId, Long subscriptionId) {
@@ -74,11 +76,8 @@ public class UserService {
 	public ResponseEntity<?> cancelSubscription(Long userId, Long subscriptionId) {
 		Subscription subscription = getSubscription(userId, subscriptionId);
 		if( subscription != null) {
-			int HOURS_24 = 24 * 60 * 60 * 1000;
-			System.out.println(System.currentTimeMillis());
-			System.out.println(subscription.getSubscriptionTime().getTime());
-			System.out.println(System.currentTimeMillis() - subscription.getSubscriptionTime().getTime() > HOURS_24 );
-			if (System.currentTimeMillis() - subscription.getSubscriptionTime().getTime() > HOURS_24 )
+			int millis = 24 * 60 * 60 * 1000;
+			if (System.currentTimeMillis() - subscription.getSubscriptionTime().getTime() > millis )
 				return ResponseEntity.badRequest().body(new MessageResponse("Invalid request"));
 			 
 			
@@ -104,10 +103,8 @@ public class UserService {
 			if(activeSubscriptions.isEmpty()) {
 				String uri = bookServiceHost + "/book/" + bookId + "/checkBook";
 				
-				Boolean bookExist = false;
 				String value= restTemplate.getForObject(uri, String.class);
-				bookExist = "BookFound".equalsIgnoreCase(value) ? true : false;
-				if(bookExist) {
+				if(Boolean.TRUE.equals("BookFound".equalsIgnoreCase(value))) {
 					
 					User user = isUserPresent.get();
 					Set<Subscription> subscriptions = user.getSubscriptions();
@@ -117,10 +114,6 @@ public class UserService {
 				} else 
 					return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.BOOKID_INVALID));
 			} else {
-//				Subscription sub1 = sub.get();
-//				sub1.setActive(true);
-//				subscriptionRepository.save(sub1);
-//				
 				return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 			}
 		} else 
@@ -130,7 +123,7 @@ public class UserService {
 
 	public ResponseEntity<MessageResponse> createBook( Book book, Long id) {
 		
-		String uri = bookServiceHost + "/author/" + id + "/createBook";
+		String uri = bookServiceHost + author + id + "/createBook";
 
 		MessageResponse result = restTemplate.postForObject(uri,book, MessageResponse.class);
 		return ResponseEntity.ok(result);
@@ -148,21 +141,15 @@ public class UserService {
 	}
 
 	public ResponseEntity<?> getAuthorBooks(Long authorId) {
-		String uri = bookServiceHost + "/author/" + authorId + "/getAuthorBooks";
+		String uri = bookServiceHost + author + authorId + "/getAuthorBooks";
 
-		RestTemplate restTemplate = new RestTemplate();
-
-		ResponseEntity<?> result = restTemplate.getForEntity(uri, List.class);
-		return result;
+		return restTemplate.getForEntity(uri, List.class);
 	}
 
 	public MessageResponse updateBook(Long authorId, Long bookId, Book book) {
-		String uri = bookServiceHost + "/author/" + authorId + "/updateBook/" + bookId;
+		String uri = bookServiceHost + author + authorId + "/updateBook/" + bookId;
 
-		RestTemplate restTemplate = new RestTemplate();
-
-		MessageResponse result = restTemplate.postForObject(uri,book, MessageResponse.class);
-		return result;
+		return restTemplate.postForObject(uri,book, MessageResponse.class);
 	}
 
 	public ResponseEntity<?> getUserDetails(Long id, String username) {
