@@ -52,6 +52,7 @@ public class WebSecurityConfig {
 		.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
 		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 		.authorizeRequests().antMatchers("/api/v1/digitalbooks/**").permitAll()
+		.antMatchers("/actuator/**").permitAll()
 		.antMatchers("/swagger-ui/**").permitAll()
 		.antMatchers("/v3/api-docs/**").permitAll()
 		.anyRequest().authenticated();

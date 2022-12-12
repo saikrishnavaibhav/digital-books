@@ -83,6 +83,9 @@ public class UserController {
 	@Value("${bookservice.host}")
 	private String bookServiceHost;
 	
+	@Value("${message:Hello world - Config Server is not working..Please check configuration }")
+	private String message;
+	
 	@Autowired
 	RestTemplate restTemplate;
 	
@@ -379,5 +382,10 @@ public class UserController {
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 		}
 		
+	}
+	
+	@RequestMapping("/getMessage")
+	String getMessage() {
+		return this.message;
 	}
 }
