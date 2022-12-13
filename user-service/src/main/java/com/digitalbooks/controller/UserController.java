@@ -342,26 +342,18 @@ public class UserController {
 	@GetMapping("/search")
 	@SuppressWarnings("unchecked")
 	public ResponseEntity<?> searchBooks(@RequestParam("category") String category, @RequestParam("title") String title,
-				@RequestParam("author") String author, @RequestParam("price") int price,  @RequestParam("publisher") String publisher) {
-		if (ObjectUtils.isEmpty(category))
-			return ResponseEntity.badRequest().body(new MessageResponse("category is not valid"));
-		if (ObjectUtils.isEmpty(title))
-			return ResponseEntity.badRequest().body(new MessageResponse("title is not valid"));
-		if (ObjectUtils.isEmpty(author))
-			return ResponseEntity.badRequest().body(new MessageResponse("author is not valid"));
-		if (ObjectUtils.isEmpty(publisher))
-			return ResponseEntity.badRequest().body(new MessageResponse("publisher is not valid"));
-		if (price < 0)
-			return ResponseEntity.badRequest().body(new MessageResponse("price is not valid"));
+				@RequestParam("author") String author) {
+		if (ObjectUtils.isEmpty(category) && ObjectUtils.isEmpty(title) && ObjectUtils.isEmpty(author))
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 		
-		String uri = bookServiceHost + "/book/searchBooks?category="+category+"&title="+title+"&author="+author+"&price="+price+"&publisher="+publisher;
+		String uri = bookServiceHost + "/book/searchBooks?category="+category+"&title="+title+"&author="+author;
 			
 		restTemplate = new RestTemplate();
 		ResponseEntity<?> result = restTemplate.getForEntity(uri, List.class);
 		if(result.getBody() == null)
-			return ResponseEntity.badRequest().body(new MessageResponse("Bad Request"));
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 		List<Book> books = (List<Book>) result.getBody();
-		if(books == null || books.isEmpty()) return ResponseEntity.badRequest().body(new MessageResponse("Invalid request"));
+		if(books == null || books.isEmpty()) return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 		return ResponseEntity.ok(books);
 		
 	}
@@ -372,7 +364,7 @@ public class UserController {
 	@GetMapping("/readers/{user-id}")
 	public ResponseEntity<?> getUserDetails(@PathVariable("user-id") Long id, HttpServletRequest httpServletRequest){
 		if (id == null)
-			return ResponseEntity.badRequest().body(new MessageResponse("invalid request"));
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 		
 		String jwt = jwtUtils.parseJwt(httpServletRequest);
 		if (jwt != null && jwtUtils.validateJwtToken(jwt)) {

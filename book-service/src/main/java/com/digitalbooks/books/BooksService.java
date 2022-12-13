@@ -102,8 +102,8 @@ public class BooksService {
 		return new MessageResponse("Invalid Request");
 	}
 
-	public List<Book> searchBooks(String category, String title, String author, Long price, String publisher) {
-		List<Book> books = bookRespository.findBooksByCategoryAndTitleAndAuthorAndPriceAndPublisher(category, title, author, price, publisher);
+	public List<Book> searchBooks(String category, String title, String author) {
+		List<Book> books = bookRespository.findBooksByCategoryOrTitleOrAuthor(category, title, author);
 		logger.info("books from search: {}",books);
 		return books;
 	}

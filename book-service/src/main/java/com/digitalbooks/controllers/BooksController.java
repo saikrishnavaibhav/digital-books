@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.digitalbooks.books.BooksService;
 import com.digitalbooks.entities.Book;
@@ -66,13 +65,12 @@ public class BooksController {
 		bookResponse.setCategory(book.getCategory());
 		bookResponse.setContent(book.getContent());
 		
-		String logo = ServletUriComponentsBuilder
-		          .fromCurrentContextPath()
-		          .path("/logos/")
-		          .path(""+book.getId())
-		          .toUriString();
-		
-		bookResponse.setLogo(logo);
+//		String logo = ServletUriComponentsBuilder
+//		          .fromCurrentContextPath()
+//		          .path("/logos/")
+//		          .path(""+book.getId())
+//		          .toUriString();
+//		bookResponse.setLogo(logo);
 		bookResponse.setPrice(book.getPrice());
 		bookResponse.setPublishedDate(book.getPublishedDate());
 		bookResponse.setPublisher(book.getPublisher());
@@ -153,13 +151,13 @@ public class BooksController {
 	 */
 	@GetMapping("/book/searchBooks")
 	public List<BookResponse> searchBooks(@RequestParam("category") String category, @RequestParam("title") String title,
-			@RequestParam("author") String author, @RequestParam("price") Long price,  @RequestParam("publisher") String publisher) {
+			@RequestParam("author") String author) {
 		
 		List<BookResponse> booksList = new ArrayList<>();
-		if(ObjectUtils.isEmpty(category) || ObjectUtils.isEmpty(title) || ObjectUtils.isEmpty(author) || ObjectUtils.isEmpty(publisher) || price == null)
+		if(ObjectUtils.isEmpty(category) && ObjectUtils.isEmpty(title) && ObjectUtils.isEmpty(author))
 			return booksList;
 		
-		List<Book> books = booksService.searchBooks(category, title, author, price, publisher);
+		List<Book> books = booksService.searchBooks(category, title, author);
 		return getBookResponses(books);
 	}
 	
