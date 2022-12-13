@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,6 +35,8 @@ public class BooksController {
 	
 	static final String INVALID_BOOKID= "Invalid book id";
 	
+	static final String INVALID_REQUEST= "Invalid Request";
+	
 	/*
 	 * Author can create a book
 	 */
@@ -41,10 +45,7 @@ public class BooksController {
 		if(id == null)
 			return ResponseEntity.badRequest().body("Invalid author Id");
 		book.setAuthorId(id);
-		MessageResponse response = booksService.saveBook(book, id);
-		if("Book with same title exists!".equals(response.getMessage()))
-			return ResponseEntity.badRequest().body("Book with same title exists!");
-		return ResponseEntity.ok(response);
+		return booksService.saveBook(book, id);
 	}
 	
 	/*
@@ -82,6 +83,7 @@ public class BooksController {
 	 * get all subscribed books of user 
 	 */
 	@PostMapping("/book/getSubscribedBooks")
+	@Cacheable("subscribedbooks")
 	public ResponseEntity<?> getAllSubscribedBooks(@RequestBody List<Long> bookIds){
 		if(bookIds.isEmpty())
 			return ResponseEntity.badRequest().body("Invalid books");
@@ -97,29 +99,27 @@ public class BooksController {
 	 * Author can block/unblock his book
 	 */
 	@GetMapping("/author/{authorId}/blockBook/{bookId}")
-	public MessageResponse getSubscribedBook(@PathVariable("authorId") Long authorId, @PathVariable("bookId") Long bookId, @RequestParam("block") boolean block) {
-		if(authorId == null)
-			return new MessageResponse("Invalid author id");
-		if(bookId == null)
-			return new MessageResponse(INVALID_BOOKID);
-		if (booksService.blockBook(authorId, bookId, block)) return new MessageResponse("Book updated successfully");
-		return new MessageResponse("Book updation failed");
+	public ResponseEntity<?> blockBook(@PathVariable("authorId") Long authorId, @PathVariable("bookId") Long bookId, @RequestParam("block") boolean block) {
+		if(authorId == null || bookId == null)
+			return ResponseEntity.badRequest().body(new MessageResponse(INVALID_REQUEST));
+		if (booksService.blockBook(authorId, bookId, block)) return ResponseEntity.ok().build();
+		return ResponseEntity.internalServerError().body(new MessageResponse("Book updation failed"));
 	}
 	
 	
 	/*
 	 * Author can update his book
 	 */
-	@PostMapping("/author/{author-id}/updateBook/{book-id}")
-	public MessageResponse updateBook(@RequestBody Book book, @PathVariable("author-id") Long authorId, @PathVariable("book-id") Long bookId) {
+	@PutMapping("/author/{author-id}/updateBook/{book-id}")
+	public ResponseEntity<?> updateBook(@RequestBody Book book, @PathVariable("author-id") Long authorId, @PathVariable("book-id") Long bookId) {
 		if(authorId == null)
-			return new MessageResponse("Invalid author id");
+			return ResponseEntity.badRequest().body("Invalid author id");
 		if(bookId == null)
-			return new MessageResponse(INVALID_BOOKID);
+			return ResponseEntity.badRequest().body(INVALID_BOOKID);
 		if(booksService.updateBook(book, bookId, authorId)) {
-			return new MessageResponse("Book updated Successfully");
+			return ResponseEntity.ok().build();
 		}
-		return new MessageResponse("Book updation failed");
+		return ResponseEntity.badRequest().body("Book updation failed");
 	}
 
 	
@@ -139,6 +139,7 @@ public class BooksController {
 	 * verify if book exists
 	 */
 	@GetMapping("/book/{book-id}/checkBook")
+	@Cacheable("bookexists")
 	public String checkBookExistance(@PathVariable("book-id") Long bookId) {
 		
 		if(bookId == null)
@@ -150,6 +151,7 @@ public class BooksController {
 	 * Anyone can search books
 	 */
 	@GetMapping("/book/searchBooks")
+	@Cacheable("searchedbooks")
 	public List<BookResponse> searchBooks(@RequestParam("category") String category, @RequestParam("title") String title,
 			@RequestParam("author") String author) {
 		
@@ -166,6 +168,7 @@ public class BooksController {
 	 * Anyone can search books
 	 */
 	@GetMapping("/author/{author-id}/getAuthorBooks")
+	@Cacheable("auhtorbooks")
 	public List<BookResponse> getAllAuthorBooks(@PathVariable("author-id") Long authorId) {
 		
 		List<BookResponse> booksList = new ArrayList<>();

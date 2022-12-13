@@ -1,11 +1,12 @@
 package com.digitalbooks.userdetails;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
@@ -44,6 +45,8 @@ public class UserService {
 	JwtUtils jwtUtils;
 	
 	String author = "/author/";
+	
+	private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
 	@Cacheable(value = "subscription")
 	public Subscription getSubscription(Long userId, Long subscriptionId) {
@@ -59,7 +62,7 @@ public class UserService {
 	
 	public Set<Subscription> getSubscriptions(Long userId) {
 		
-		Set<Subscription> subscriptionsList = new HashSet<>();
+		Set<Subscription> subscriptionsList = null;
 		User user = verifyAndGetUser(userId);
 		if(user != null)
 			subscriptionsList = user.getSubscriptions();
@@ -121,12 +124,11 @@ public class UserService {
 		
 	}
 
-	public ResponseEntity<MessageResponse> createBook( Book book, Long id) {
+	public ResponseEntity<?> createBook( Book book, Long id) {
 		
 		String uri = bookServiceHost + author + id + "/createBook";
-
-		MessageResponse result = restTemplate.postForObject(uri,book, MessageResponse.class);
-		return ResponseEntity.ok(result);
+		ResponseEntity<?> result = restTemplate.postForObject(uri,book, ResponseEntity.class);
+		return result;
 	}
 
 	public ResponseEntity<?> fetchSubscribedBook(Long userId, Long subscriptionId) {
@@ -146,10 +148,10 @@ public class UserService {
 		return restTemplate.getForEntity(uri, List.class);
 	}
 
-	public MessageResponse updateBook(Long authorId, Long bookId, Book book) {
+	public ResponseEntity<?> updateBook(Long authorId, Long bookId, Book book) {
 		String uri = bookServiceHost + author + authorId + "/updateBook/" + bookId;
-
-		return restTemplate.postForObject(uri,book, MessageResponse.class);
+		restTemplate.put(uri,book);
+		return ResponseEntity.ok().build();
 	}
 
 	public ResponseEntity<?> getUserDetails(Long id, String username) {
@@ -159,6 +161,31 @@ public class UserService {
 			user.setSubscriptions(user.getSubscriptions().stream().filter(Subscription::isActive).collect(Collectors.toSet()));
 			return ResponseEntity.ok(isUserPresent.get());
 		}
+		return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
+	}
+
+
+	public ResponseEntity<?> blockBook(int bookId, int authorId, boolean block) {
+		String uri = bookServiceHost + "/author/" + authorId + "/blockBook/" + bookId +"?block=" + block;
+		ResponseEntity<?> result = restTemplate.getForObject(uri, ResponseEntity.class);
+		return result;
+	}
+
+	public ResponseEntity<?> fetchAllSubscribedBooks(Long userId) {
+		
+		Set<Subscription> subscriptionsList = getSubscriptions(userId);
+		
+		if(subscriptionsList != null && !subscriptionsList.isEmpty()) {
+			
+			List<Long> bookIds = subscriptionsList.stream().filter(Subscription::isActive).map(Subscription::getBookId).collect(Collectors.toList());
+			
+			String uri = bookServiceHost + "/book/getSubscribedBooks";
+			
+			restTemplate = new RestTemplate();
+			ResponseEntity<?> result = restTemplate.postForEntity(uri, bookIds, List.class);
+			return ResponseEntity.ok(result.getBody());
+		}
+		
 		return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 	}
 	

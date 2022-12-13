@@ -180,7 +180,7 @@ public class UserController {
 	 */
 	@PostMapping("/author/{author-id}/books")
 	@PreAuthorize("hasRole('AUTHOR')")
-	public ResponseEntity<MessageResponse> createABook(HttpServletRequest request, @RequestBody Book book, @PathVariable("author-id") Long id) {
+	public ResponseEntity<?> createABook(HttpServletRequest request, @RequestBody Book book, @PathVariable("author-id") Long id) {
 		if (ObjectUtils.isEmpty(id))
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.AUTHORID_INVALID));
 		
@@ -229,23 +229,10 @@ public class UserController {
 	@GetMapping("/readers/{user-id}/books")
 	@PreAuthorize("hasRole('READER')")
 	public ResponseEntity<?> fetchAllSubscribedBooks(@PathVariable("user-id") Long userId) {
-		if (ObjectUtils.isEmpty(userId) || !userRepository.existsById(userId))
+		if (ObjectUtils.isEmpty(userId))
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.USERID_INVALID));
 		
-		Set<Subscription> subscriptionsList = userService.getSubscriptions(userId);
-		
-		if(!subscriptionsList.isEmpty()) {
-			
-			List<Long> bookIds = subscriptionsList.stream().filter(Subscription::isActive).map(Subscription::getBookId).collect(Collectors.toList());
-			
-			String uri = bookServiceHost + "/book/getSubscribedBooks";
-			
-			restTemplate = new RestTemplate();
-			ResponseEntity<?> result = restTemplate.postForEntity(uri, bookIds, List.class);
-			return ResponseEntity.ok(result.getBody());
-		}
-		
-		return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
+		return userService.fetchAllSubscribedBooks(userId);
 	}
 
 	/*
@@ -253,22 +240,13 @@ public class UserController {
 	 */
 	@PostMapping("/author/{author-id}/books/{book-id}")
 	@PreAuthorize("hasRole('AUTHOR')")
-	public ResponseEntity<MessageResponse> blockABook(@PathVariable("author-id") int authorId, @PathVariable("book-id") int bookId, @RequestParam("block") boolean block) {
+	public ResponseEntity<?> blockABook(@PathVariable("author-id") int authorId, @PathVariable("book-id") int bookId, @RequestParam("block") boolean block) {
 		if (ObjectUtils.isEmpty(authorId))
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.AUTHORID_INVALID));
 		if (ObjectUtils.isEmpty(bookId))
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.BOOKID_INVALID));
 		
-		String uri = bookServiceHost + "/author/" + authorId + "/blockBook/" + bookId +"?block=" + block;
-
-		MessageResponse result = restTemplate.getForObject(uri, MessageResponse.class);
-		return getResultResponseEntity(result);
-	}
-
-	private ResponseEntity<MessageResponse> getResultResponseEntity(MessageResponse result) {
-		if(result == null || result.getMessage().equals("Book updation failed"))
-			return ResponseEntity.badRequest().body(result);
-		return ResponseEntity.ok(result);
+		return userService.blockBook(bookId,authorId,block);
 	}
 
 	/*
@@ -283,7 +261,7 @@ public class UserController {
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.BOOKID_INVALID));
 		
 		
-		return getResultResponseEntity(userService.updateBook(authorId,bookId, book));
+		return userService.updateBook(authorId,bookId, book);
 	}
 	
 	/*

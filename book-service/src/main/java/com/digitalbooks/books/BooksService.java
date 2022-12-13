@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.digitalbooks.entities.Book;
@@ -22,18 +24,19 @@ public class BooksService {
 	
 	private static final Logger logger = LoggerFactory.getLogger(BooksService.class);
 	
-	public MessageResponse saveBook(Book book, Long authorId) {
+	public ResponseEntity<?> saveBook(Book book, Long authorId) {
 		
 		try {
 			if(Boolean.TRUE.equals(bookRespository.existsByAuthorIdAndTitle(authorId, book.getTitle()))) {
-				return new MessageResponse("Book with same title exists!");
+				return ResponseEntity.badRequest().body("Book with same title exists!");
 			}
-			bookRespository.save(book);
+			book = bookRespository.save(book);
+			logger.info("saved book : {}",book);
 		} catch (Exception exception) {
-			return new MessageResponse("Error: "+exception.getMessage());
+			return ResponseEntity.internalServerError().body("Error: "+exception.getMessage());
 		}
 		
-		return new MessageResponse("Book added successfully!");
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 	
 	public List<Book> getBooks(){
@@ -53,7 +56,7 @@ public class BooksService {
 	
 	public List<Book> getAllSubscribedBooks(List<Long> bookIds){
 		
-		List<Book> allSubscribedBooks  = bookRespository.findAllById(bookIds);
+		List<Book> allSubscribedBooks = bookRespository.findAllById(bookIds);
 		return allSubscribedBooks.stream().filter(Book::getActive).collect(Collectors.toList());
 		
 	}
@@ -67,7 +70,7 @@ public class BooksService {
 
 			Book book1 = bookRespository.save(book);
 			if(book1.getActive() != block) {
-				logger.info("book updated to active status: {}", block);
+				logger.info("book {} updated to active status: {}", bookId, block);
 				return true;
 			} else 
 				return false;
