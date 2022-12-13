@@ -10,16 +10,15 @@ import { UserService } from '../_services/user.service';
 })
 export class HomeComponent {
 
-  isSearchSuccess = false;
+  isSearchSuccess: any;
+  isSearchFailed = false;
   errorMessage = "";
   isUserLoggedIn = this.tokenService.getUser() !== null;
 
   searchForm : any = {
     category:null,
     title:null,
-    author:null,
-    price:null,
-    publisher:null
+    author:null
   };
   
   books : any[] = []
@@ -36,11 +35,13 @@ export class HomeComponent {
   constructor(private userService: UserService, private tokenService: TokenStorageService) { }
 
   onSearch(){
-    const {category, title, author,price,publisher} = this.searchForm;
-    this.userService.search(category, title, author,price,publisher).subscribe(
+    const {category, title, author} = this.searchForm;
+    this.userService.search(category, title, author).subscribe(
       data => {
+        this.books = []
         console.log(data);
         this.isSearchSuccess = true;
+        this.isSearchFailed = false;
         for ( let b of data){
           this.book = b;
           this.books.push(this.book);
@@ -49,9 +50,11 @@ export class HomeComponent {
       error => {
         console.error(error);
         this.isSearchSuccess = false;
+        this.isSearchFailed = true;
         if(error instanceof HttpErrorResponse){
           console.error(error.error.message);
           this.errorMessage = error.error.message
+
         }
         
       }

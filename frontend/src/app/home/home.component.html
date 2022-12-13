@@ -14,7 +14,8 @@
         class="form-control"
         name="category"
         [(ngModel)]="searchForm.category"
-        required
+        />
+        <!-- required
         minlength="3"
         #category="ngModel"
       />
@@ -23,7 +24,7 @@
         <div *ngIf="category.errors.minlength">
           category must be at least 3 characters
         </div>
-      </div>
+      </div> -->
     </div>
     <div class="form-group">
       <label for="title">Title</label>
@@ -32,7 +33,8 @@
         class="form-control"
         name="title"
         [(ngModel)]="searchForm.title"
-        required
+        />
+        <!-- required
         minlength="3"
         #title="ngModel"
       />
@@ -41,7 +43,7 @@
         <div *ngIf="title.errors.minlength">
           title must be at least 3 characters
         </div>
-      </div>
+      </div> -->
     </div>
     <div class="form-group">
       <label for="author">Author</label>
@@ -50,48 +52,18 @@
         class="form-control"
         name="author"
         [(ngModel)]="searchForm.author"
-        required
+        />
+        
+        <!-- required
         minlength="3"
-        #author="ngModel"
-      />
-      <div class="alert-danger" *ngIf="author.errors && f.submitted">
+        #author="ngModel" -->
+      
+      <!-- <div class="alert-danger" *ngIf="author.errors && f.submitted">
         <div *ngIf="author.errors.required">author is required</div>
         <div *ngIf="author.errors.minlength">
           author must be at least 3 characters
         </div>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="price">Price below</label>
-      <input
-        type="number"
-        class="form-control"
-        name="price"
-        [(ngModel)]="searchForm.price"
-        required
-        #price="ngModel"
-      />
-      <div class="alert-danger" *ngIf="price.errors && f.submitted">
-        <div *ngIf="price.errors.required">price is required</div>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="publisher">Publisher</label>
-      <input
-        type="text"
-        class="form-control"
-        name="publisher"
-        [(ngModel)]="searchForm.publisher"
-        required
-        minlength="3"
-        #publisher="ngModel"
-      />
-      <div class="alert-danger" *ngIf="publisher.errors && f.submitted">
-        <div *ngIf="publisher.errors.required">publisher is required</div>
-        <div *ngIf="publisher.errors.minlength">
-          publisher must be at least 3 characters
-        </div>
-      </div>
+      </div> -->
     </div>
     <div class="form-group">
       <button class="btn btn-primary btn-block">search</button>
@@ -101,14 +73,14 @@
       <div
         class="alert alert-danger"
         role="alert"
-        *ngIf="isSearchSuccess"
+        *ngIf="isSearchFailed"
       >
         Search failed: {{ errorMessage }}
       </div>
     </div>
   </form>
   </div>
-  <div class="container" ng-app="Subsciptions App" ng-controller="Subsciptions controller" *ngIf="isSearchSuccess">
+  <div class="search-container" ng-app="Subsciptions App" ng-controller="Subsciptions controller" *ngIf="isSearchSuccess">
     <button (click)="oncancelSearch()">cancel search</button>
     <h3>Books related to search</h3>   
       <ul class="list-group">

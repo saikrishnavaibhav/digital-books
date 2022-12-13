@@ -16,13 +16,11 @@ export class UserService {
     
   constructor(private http: HttpClient) { }
 
-  search(category: any, title: any, author: any, price: any, publisher: any) : Observable<any> {
+  search(category: any, title: any, author: any) : Observable<any> {
     let queryParams = new HttpParams();
     queryParams = queryParams.append("category",category)
                               .append("title",title)
-                              .append("author",author)
-                              .append("price",price)
-                              .append("publisher",publisher);
+                              .append("author",author);
 
     return this.http.get(API_URL + '/search', {params:queryParams});
   }
