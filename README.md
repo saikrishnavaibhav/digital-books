@@ -34,3 +34,9 @@ worked on viewing book details and subscriptions by user, create book by author 
 
 11-10-2022
 worked on update/block/unblock book by author and subscribe/unsubscribe to a book by user from front-end
+
+12-10-2022
+worked on sonarQube fixes and added config server
+
+13-12-2022
+worked on unit tests and optimising api responses and worked on css for front end
