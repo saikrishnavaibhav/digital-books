@@ -8,8 +8,8 @@
           <br>
           {{book.title}}
         </div>
-        <div class="book-edit-container">
-          <button (click)="onCancelSubscription(book.id)">cancel subscription</button><!-- [routerLink]="['/updateBook']"-->
+        <div *ngIf="verifyIfLessThan24Hrs(book.id)">
+          <button class="btn btn-primary btn-block" (click)="onCancelSubscription(book.id)" >cancel subscription</button>
         </div>
       </li>
     </ul>

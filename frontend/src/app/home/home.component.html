@@ -69,14 +69,10 @@
         name="price"
         [(ngModel)]="searchForm.price"
         required
-        minlength="1"
         #price="ngModel"
       />
       <div class="alert-danger" *ngIf="price.errors && f.submitted">
         <div *ngIf="price.errors.required">price is required</div>
-        <div *ngIf="price.errors.minlength">
-          price must be at least 1 characters
-        </div>
       </div>
     </div>
     <div class="form-group">

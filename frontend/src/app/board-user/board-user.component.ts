@@ -80,4 +80,23 @@ export class BoardUserComponent implements OnInit {
     )
   }
 
+  verifyIfLessThan24Hrs(bookId: any){
+    var currentTimestamp = Date.now();
+    var twentyFourHours = 24 * 60 * 60 * 1000;
+   
+    this.user = this.tokenStorageService.getUser();
+    let subs =  this.user.subscriptions;
+    for(let sub of subs){
+      let subscriptionTimeStamp = Date.parse(sub.subscriptionTime);
+      
+      if(bookId === sub.bookId){
+        if((currentTimestamp - subscriptionTimeStamp) > twentyFourHours){
+          return false;
+        }
+
+      }
+    }
+    return true;
+  }
+
 }
