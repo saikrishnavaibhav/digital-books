@@ -3,17 +3,27 @@
     height: 100%;
 }
 
-.list-group{
-    display: table-row;
-    
-}
-.list-group-item {
-    width: 280px;
-    height: 220px;
-    display: table-cell;
-    
-}
 .book-container{
+    display: inline-block;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
     text-align: center;
-    align-items: center;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    vertical-align: top;
+}
+
+button{
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+    display: inline-block;
+    font-weight: 400;
+    margin-left: 5px;
+    margin-right: 5px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    width: auto;
 }

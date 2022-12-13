@@ -1,9 +1,7 @@
 <div class="container" ng-app="Subsciptions App" ng-controller="Subsciptions controller">
   <h3> Active subsciptions</h3>
-    
-    <ul class="list-group">
-      <li class="list-group-item" *ngFor="let book of books">
-        <div class="book-container"  (click)="onClick(book)" [routerLink]="['/book', book.id]">
+    <div class="book-container" *ngFor="let book of books">
+        <div class="book-details-container"  (click)="onClick(book)" [routerLink]="['/book', book.id]">
           <img src="https://i.pinimg.com/474x/dd/95/a3/dd95a351f81a30205d6fd1428fd28b8d.jpg" alt="" width="250" height="200"><!--{{book.logo}}-->
           <br>
           {{book.title}}
@@ -11,6 +9,5 @@
         <div *ngIf="verifyIfLessThan24Hrs(book.id)">
           <button class="btn btn-primary btn-block" (click)="onCancelSubscription(book.id)" >cancel subscription</button>
         </div>
-      </li>
-    </ul>
+    </div>
 </div>

@@ -1,33 +1,23 @@
-.container{
-    width: 100%;
-    height: 100%;
-}
-
-.list-group{
-    display: table-row;
-    
-}
-.list-group-item {
-    width: 280px;
-    height: 220px;
-    display: table-cell;
-    
-}
 .book-container{
+    display: inline-block;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
     text-align: center;
-    align-items: center;
-}
-
-.book-edit-container{
-    width: 100%;
-    align-content: flex;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 button{
-    width: 40%;
-    border-radius: 2px;
-    color: black;
-    background-color: rgb(174, 179, 218);
-    border: none;
-    margin-left: 10px;
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+    display: inline-block;
+    font-weight: 400;
+    margin-left: 5px;
+    margin-right: 5px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    width: 100px;
 }

@@ -15,16 +15,6 @@
         name="category"
         [(ngModel)]="searchForm.category"
         />
-        <!-- required
-        minlength="3"
-        #category="ngModel"
-      />
-      <div class="alert-danger" *ngIf="category.errors && f.submitted">
-        <div *ngIf="category.errors.required">category is required</div>
-        <div *ngIf="category.errors.minlength">
-          category must be at least 3 characters
-        </div>
-      </div> -->
     </div>
     <div class="form-group">
       <label for="title">Title</label>
@@ -34,16 +24,6 @@
         name="title"
         [(ngModel)]="searchForm.title"
         />
-        <!-- required
-        minlength="3"
-        #title="ngModel"
-      />
-      <div class="alert-danger" *ngIf="title.errors && f.submitted">
-        <div *ngIf="title.errors.required">title is required</div>
-        <div *ngIf="title.errors.minlength">
-          title must be at least 3 characters
-        </div>
-      </div> -->
     </div>
     <div class="form-group">
       <label for="author">Author</label>
@@ -53,17 +33,6 @@
         name="author"
         [(ngModel)]="searchForm.author"
         />
-        
-        <!-- required
-        minlength="3"
-        #author="ngModel" -->
-      
-      <!-- <div class="alert-danger" *ngIf="author.errors && f.submitted">
-        <div *ngIf="author.errors.required">author is required</div>
-        <div *ngIf="author.errors.minlength">
-          author must be at least 3 characters
-        </div>
-      </div> -->
     </div>
     <div class="form-group">
       <button class="btn btn-primary btn-block">search</button>
@@ -82,10 +51,10 @@
   </div>
   <div class="search-container" ng-app="Subsciptions App" ng-controller="Subsciptions controller" *ngIf="isSearchSuccess">
     <button (click)="oncancelSearch()">cancel search</button>
-    <h3>Books related to search</h3>   
-      <ul class="list-group">
-        <li class="list-group-item" *ngFor="let book of books">
-          <div class="book-container"  (click)="onClick(book)">
+    <br>
+    <h5>Books related to search</h5>   
+      <div class="book-container" *ngFor="let book of books">
+          <div class="book-details-container"  (click)="onClick(book)">
             <img src="https://i.pinimg.com/474x/dd/95/a3/dd95a351f81a30205d6fd1428fd28b8d.jpg" alt="" width="250" height="200"><!--{{book.logo}}-->
             <br>
             {{book.title}}
@@ -94,7 +63,6 @@
             <button (click)="onSubscribe(book.id)" *ngIf="!subscribed(book.id)">subscribe</button><!-- [routerLink]="['/updateBook']"-->
             <button (click)="onUnSubscribe(book.id)" *ngIf="subscribed(book.id)">unsubscribe</button><!-- [routerLink]="['/updateBook']"-->
           </div>
-        </li>
-      </ul>
+        </div>
   </div>
 </div>
