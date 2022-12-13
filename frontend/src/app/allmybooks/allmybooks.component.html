@@ -1,5 +1,5 @@
-<h5>Books created by {{user.username}}</h5>
 <div class="allbooks-container" ng-app="books App" ng-controller="books controller">
+  <h5>Books created by {{user.username}}</h5>
     <div class="book-container" *ngFor="let book of books">
       <div class="book-item">
           <div class="book-details-container"  (click)="onClick(book)" [routerLink]="['/book', book.id]">
