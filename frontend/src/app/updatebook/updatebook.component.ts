@@ -29,16 +29,15 @@ export class UpdatebookComponent implements OnInit{
 
   onUpdate(){
     this.authorService.updateBook(this.book).subscribe(
-      data=>{
+      ()=>{
         this.isSuccessful = true;
-        this.errorMessage = data.message;
+        
       },
       error => {
         console.error(error);
-        this.errorMessage = "Book updation failed!"
+        //this.errorMessage = error.error.message
       }
     );
   }
-
 
 }

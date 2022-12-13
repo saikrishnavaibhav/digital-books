@@ -20,7 +20,6 @@ export class AuthorService {
   user = this.tokenService.getUser();
 
   createBook(book: any) : Observable<any> {
-    //let user = this.tokenService.getUser();
     return this.http.post(API_URL +"/author/"+this.user.id+"/books",book,httpOptions);
   }
 

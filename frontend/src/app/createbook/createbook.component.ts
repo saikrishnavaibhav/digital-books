@@ -22,13 +22,11 @@ export class CreatebookComponent {
   constructor(private authorService: AuthorService){}
 
   onCreate(){
-    const{logo, title, publisher,category,content,price} = this.book;
     this.authorService.createBook(this.book).subscribe(data=> {
-      console.log(data.message);
       this.isSuccessful = true;
-      // setTimeout(() => {
-      //   window.location.reload();
-      // }, 1000);
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
     },
     error=> {
       console.error(error);

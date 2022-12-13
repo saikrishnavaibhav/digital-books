@@ -127,7 +127,7 @@
       <button class="btn btn-primary btn-block">create book</button>
     </div>
 
-      <div class="alert alert-warning" *ngIf="f.submitted && !isSuccessful">
+      <div class="alert alert-error" *ngIf="f.submitted && !isSuccessful">
         Book Creation failed!<br />{{ errorMessage }}
       </div>
     </form>
