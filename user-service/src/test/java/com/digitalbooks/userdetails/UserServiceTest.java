@@ -4,11 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -28,6 +31,7 @@ import com.digitalbooks.entities.User;
 import com.digitalbooks.jwt.JwtUtils;
 import com.digitalbooks.repositories.SubscriptionRepository;
 import com.digitalbooks.repositories.UserRepository;
+import com.digitalbooks.requests.Book;
 import com.digitalbooks.requests.SubscriptionRequest;
 import com.digitalbooks.responses.BookResponse;
 import com.digitalbooks.responses.MessageResponse;
@@ -115,16 +119,17 @@ class UserServiceTest {
 	@Test
 	void testSubscribeABook() {
 		Optional<User> user = Optional.ofNullable(new User());
-		when(userRepository.findById(any())).thenReturn(user);
 		
-		User user1 = new User();
 		Set<Subscription> subs = new HashSet<>();
 		Subscription sub = getSubscripton();
 		subs.add(sub);
-		user1.setSubscriptions(subs);
+		user.get().setSubscriptions(subs);
+		List<Subscription> subsList = new ArrayList<>();
+		sub.setActive(false);
+		subsList.add(sub);
 		
-		when(userRepository.save(any())).thenReturn(user1);
-    	
+		when(userRepository.findById(any())).thenReturn(user);
+    	when( subscriptionRepository.findByBookIdAndUserId(4L,3L)).thenReturn(subsList);
     	String uri = bookServiceHost + "/book/4/checkBook";
         Mockito
           .when(restTemplate.getForObject(uri, String.class))
@@ -133,6 +138,25 @@ class UserServiceTest {
         ResponseEntity<MessageResponse> res = userService.subscribeABook(getSubscriptonRequest(), 4L);
  
         assertEquals(HttpStatus.OK, res.getStatusCode());
+	}
+	
+	@Test
+	void testSubscribeABookForError() {
+		Optional<User> user = Optional.ofNullable(new User());
+		
+		Set<Subscription> subs = new HashSet<>();
+		Subscription sub = getSubscripton();
+		subs.add(sub);
+		user.get().setSubscriptions(subs);
+		List<Subscription> subsList = new ArrayList<>();
+		subsList.add(sub);
+		
+		when(userRepository.findById(any())).thenReturn(user);
+    	when( subscriptionRepository.findByBookIdAndUserId(4L,3L)).thenReturn(subsList);
+    	
+        ResponseEntity<MessageResponse> res = userService.subscribeABook(getSubscriptonRequest(), 4L);
+ 
+        assertEquals(HttpStatus.BAD_REQUEST, res.getStatusCode());
 	}
 	
 	@Test
@@ -156,23 +180,16 @@ class UserServiceTest {
         assertEquals(HttpStatus.BAD_REQUEST, res.getStatusCode());
 	}
 
-//	@Test
-//	public void testCreateBook() {
-//		String uri = bookServiceHost + "/author/1/createBook";
-//		
-//		when(jwtUtils.parseJwt(any())).thenReturn("book");
-//		when(jwtUtils.validateJwtToken(any())).thenReturn(true);
-//		when(jwtUtils.getUserNameFromJwtToken(any())).thenReturn("oda");
-//		
-//		 Mockito
-//        .when(restTemplate.postForObject(uri,new Book(), MessageResponse.class))
-//        .thenReturn(new MessageResponse());
-//		 Book book = new Book();
-//		 book.setAuthorName("oda");
-//		 ResponseEntity<?> res = userService.createBook( book , 1L);
-//		 assertEquals(HttpStatus.OK, res.getStatusCode());
-//		
-//	}
+	@Test
+	void testCreateBook() {
+		String uri = bookServiceHost + "/author/1/createBook";
+
+		 Mockito
+        .when(restTemplate.postForObject(uri,new Book(), ResponseEntity.class)).thenReturn(ResponseEntity.status(HttpStatus.CREATED).build());
+		 ResponseEntity<?> res = userService.createBook( new Book() , 1L);
+		 assertEquals(HttpStatus.CREATED, res.getStatusCode());
+		
+	}
 
 	@Test
 	void testFetchSubscribedBook() {
@@ -192,6 +209,66 @@ class UserServiceTest {
 		Subscription subscription = getSubscripton();
 		ResponseEntity<?> res = userService.fetchSubscribedBook(subscription.getUserId(), subscription.getId());
 		 assertEquals(HttpStatus.BAD_REQUEST, res.getStatusCode());
+	}
+	
+	@Test
+	void testGetAuthorBooks() {
+		String uri = bookServiceHost + "/author/1/getAuthorBooks";
+
+		 Mockito
+         .when(restTemplate.getForEntity(uri, List.class))
+         .thenReturn(ResponseEntity.ok().build());
+		 
+		 ResponseEntity<?> res = userService.getAuthorBooks(1L);
+		 assertEquals(HttpStatus.OK, res.getStatusCode());
+	}
+	
+	@Test
+	void testUpdateBook() {
+		String uri = bookServiceHost + "/author/1/updateBook/1";
+		
+		doNothing().when(restTemplate).put(uri,new Book());
+		ResponseEntity<?> res = userService.updateBook(1L, 1L, new Book());
+		assertEquals(HttpStatus.OK, res.getStatusCode());
+	}
+	
+	@Test
+	void testBlockBook() {
+		String uri = bookServiceHost + "/author/1/blockBook/1?block=false";
+		Mockito
+        .when(restTemplate.getForObject(uri, ResponseEntity.class))
+        .thenReturn(ResponseEntity.ok().build());
+		ResponseEntity<?> result = userService.blockBook(1L, 1L, false);
+		assertEquals(HttpStatus.OK, result.getStatusCode());
+	}
+	
+	@Test
+	void TestFetchAllSubscribedBooks() {
+		Optional<User> user = Optional.ofNullable(new User());
+		
+		Set<Subscription> subs = new HashSet<>();
+		Subscription sub = getSubscripton();
+		subs.add(sub);
+		user.get().setSubscriptions(subs);
+		
+		when(userRepository.findById(any())).thenReturn(user);
+		
+		String uri = bookServiceHost + "/book/getSubscribedBooks";
+		List<Long> bookIds = new ArrayList<>();
+		bookIds.add(4L);
+		Mockito.when(restTemplate.postForEntity(uri, bookIds, List.class))
+		.thenReturn(ResponseEntity.ok().build());
+		ResponseEntity<?> result = userService.fetchAllSubscribedBooks(3L);
+		assertEquals(HttpStatus.OK, result.getStatusCode());
+	}
+	
+	@Test
+	void TestFetchAllSubscribedBooksForError() {
+		Optional<User> user = Optional.ofNullable(new User());
+		when(userRepository.findById(any())).thenReturn(user);
+		
+		ResponseEntity<?> result = userService.fetchAllSubscribedBooks(3L);
+		assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
 	}
 
 	private Optional<User> getUser() {
@@ -216,11 +293,11 @@ class UserServiceTest {
 
 	private SubscriptionRequest getSubscriptonRequest() {
 		SubscriptionRequest sub = new SubscriptionRequest();
-//		sub.setActive(true);
-//		sub.setBookId(4L);
-//		sub.setId(4L);
-//		sub.setSubscriptionTime("2022-11-01 16:19:00.100");
-//		sub.setUserId(3L);
+		sub.setActive(true);
+		sub.setBookId(4L);
+		sub.setId(4L);
+		sub.setSubscriptionTime("2022-11-01 16:19:00.100");
+		sub.setUserId(3L);
 		return sub;
 	}
 }

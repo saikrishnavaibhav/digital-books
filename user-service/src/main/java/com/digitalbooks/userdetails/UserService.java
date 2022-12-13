@@ -50,8 +50,9 @@ public class UserService {
 
 	@Cacheable(value = "subscription")
 	public Subscription getSubscription(Long userId, Long subscriptionId) {
-
-		Subscription subscription = getSubscriptions(userId).stream().filter(sub -> sub.getId().equals(subscriptionId) && sub.isActive())
+		Set<Subscription> subscriptions = getSubscriptions(userId);
+		if(subscriptions == null) return null;
+		Subscription subscription = subscriptions.stream().filter(sub -> sub.getId().equals(subscriptionId) && sub.isActive())
 				.findAny().orElse(null);
 		if (subscription != null) {
 			return subscription;
@@ -101,7 +102,7 @@ public class UserService {
 		
 		Optional<User> isUserPresent = userRepository.findById(subscription.getUserId());
 		if (isUserPresent.isPresent()) {
-			List<Subscription> subscriptionsList =subscriptionRepository.findByBookIdAndUserId(bookId, subscriptionRequest.getUserId());
+			List<Subscription> subscriptionsList = subscriptionRepository.findByBookIdAndUserId(bookId, subscriptionRequest.getUserId());
 			Set<Subscription> activeSubscriptions = subscriptionsList.stream().filter(Subscription::isActive).collect(Collectors.toSet());
 			if(activeSubscriptions.isEmpty()) {
 				String uri = bookServiceHost + "/book/" + bookId + "/checkBook";
@@ -165,7 +166,7 @@ public class UserService {
 	}
 
 
-	public ResponseEntity<?> blockBook(int bookId, int authorId, boolean block) {
+	public ResponseEntity<?> blockBook(Long bookId, Long authorId, boolean block) {
 		String uri = bookServiceHost + "/author/" + authorId + "/blockBook/" + bookId +"?block=" + block;
 		ResponseEntity<?> result = restTemplate.getForObject(uri, ResponseEntity.class);
 		return result;
@@ -180,8 +181,6 @@ public class UserService {
 			List<Long> bookIds = subscriptionsList.stream().filter(Subscription::isActive).map(Subscription::getBookId).collect(Collectors.toList());
 			
 			String uri = bookServiceHost + "/book/getSubscribedBooks";
-			
-			restTemplate = new RestTemplate();
 			ResponseEntity<?> result = restTemplate.postForEntity(uri, bookIds, List.class);
 			return ResponseEntity.ok(result.getBody());
 		}

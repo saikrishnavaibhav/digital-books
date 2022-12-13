@@ -240,7 +240,7 @@ public class UserController {
 	 */
 	@PostMapping("/author/{author-id}/books/{book-id}")
 	@PreAuthorize("hasRole('AUTHOR')")
-	public ResponseEntity<?> blockABook(@PathVariable("author-id") int authorId, @PathVariable("book-id") int bookId, @RequestParam("block") boolean block) {
+	public ResponseEntity<?> blockABook(@PathVariable("author-id") Long authorId, @PathVariable("book-id") Long bookId, @RequestParam("block") boolean block) {
 		if (ObjectUtils.isEmpty(authorId))
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.AUTHORID_INVALID));
 		if (ObjectUtils.isEmpty(bookId))

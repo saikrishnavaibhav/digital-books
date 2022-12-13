@@ -31,6 +31,26 @@ public class SubscriptionRequest {
 	public String getSubscriptionTime() {
 		return subscriptionTime;
 	}
+	
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public void setBookId(Long bookId) {
+		this.bookId = bookId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	public void setSubscriptionTime(String subscriptionTime) {
+		this.subscriptionTime = subscriptionTime;
+	}
 
 	@Override
 	public String toString() {
