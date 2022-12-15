@@ -10,6 +10,8 @@ import { TokenStorageService } from '../_services/token-storage.service';
 })
 export class AllmybooksComponent implements OnInit {
 
+  isBooksAvailable = false;
+
   user: any = {
     id: null,
     username: null,
@@ -45,6 +47,9 @@ export class AllmybooksComponent implements OnInit {
     this.user = this.tokenStorageService.getUser();
     this.authorService.getBooksCreatedByAuthor(this.user.id).subscribe(
       data  => {
+        let booksOfAuthor:any[] = data;
+        if(booksOfAuthor.length === 0) this.isBooksAvailable = false;
+        else this.isBooksAvailable = true;
         for(let b of data){
           this.book = b;
           if(this.book.publishedDate != null){

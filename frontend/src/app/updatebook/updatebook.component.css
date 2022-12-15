@@ -1,3 +1,17 @@
 .update-book{
     font-family: 'Questrial';
 }
+
+.book-details{
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 30px;
+    margin-left: 20px;
+}
+
+.book{
+    width: 60%;
+    padding-left: 10px;
+    padding-right: 10px;
+    
+}

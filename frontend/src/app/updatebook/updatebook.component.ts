@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthorService } from '../_services/author.service';
 import { BookstorageService } from '../_services/bookstorage.service';
 
@@ -21,21 +22,23 @@ export class UpdatebookComponent implements OnInit{
     price: null
   }
 
-  constructor(private authorService: AuthorService, private bookService: BookstorageService){}
+  constructor(private authorService: AuthorService, private bookService: BookstorageService, private router: Router){}
   
   ngOnInit(): void {
     this.book = this.bookService.getBook();
   }
 
   onUpdate(){
+    this.book.publishedDate = null;
     this.authorService.updateBook(this.book).subscribe(
       ()=>{
         this.isSuccessful = true;
-        
+        setTimeout(() => {
+          this.router.navigateByUrl('/allMybooks')
+        }, 2000);
       },
       error => {
         console.error(error);
-        //this.errorMessage = error.error.message
       }
     );
   }
