@@ -40,3 +40,7 @@ worked on sonarQube fixes and added config server
 
 13-12-2022
 worked on unit tests and optimising api responses and worked on css for front end
+
+14-12-2022
+worked on code optimization and front end view changes
+
