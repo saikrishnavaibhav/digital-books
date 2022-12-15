@@ -38,11 +38,21 @@ export class AllmybooksComponent implements OnInit {
   constructor(private authorService: AuthorService, private tokenStorageService: TokenStorageService, private bookService: BookstorageService) { }
 
   ngOnInit(): void {
+   this.loadBooks();
+
+  }
+  loadBooks() {
     this.user = this.tokenStorageService.getUser();
     this.authorService.getBooksCreatedByAuthor(this.user.id).subscribe(
       data  => {
         for(let b of data){
           this.book = b;
+          if(this.book.publishedDate != null){
+            let date = new Date(Date.parse(this.book.publishedDate));
+            this.book.publishedDate = date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
+          } else {
+            this.book.publishedDate = 'Not Available';
+          }
           this.books.push(this.book);
         }
       },
@@ -50,7 +60,6 @@ export class AllmybooksComponent implements OnInit {
         console.error(error);
       }
     );
-
   }
 
   onClick(book : any) : void {
@@ -71,12 +80,27 @@ export class AllmybooksComponent implements OnInit {
     this.authorService.blockBook(bookId, block).subscribe(
       data=>{
         console.log("book updated");
-        window.location.reload();
+        this.modifyBooksDataOfAuthor(bookId, block);
       },
       error=>{
         console.error(error);
       }
     );
+  }
+  
+  modifyBooksDataOfAuthor(bookId: any, block: any) {
+    let books = this.books;
+    let active = true;
+    if(block === 'yes')
+      active = false;
+    else
+      active = true;
+    books.map(b=>{
+      if(b.id === bookId){
+        b.active = active;
+      }
+    })
+
   }
 
   onUpdate(book : any) : void {

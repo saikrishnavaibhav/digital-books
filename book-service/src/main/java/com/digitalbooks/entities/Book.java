@@ -53,7 +53,7 @@ public class Book {
 	@Size(min = 50, max = 2000)
 	private String content;
 	
-	private boolean active;
+	private boolean active = true;
 
 	public Long getId() {
 		return id;
