@@ -41,6 +41,12 @@ export class BoardUserComponent implements OnInit {
   constructor(private userService: UserService, private tokenStorageService: TokenStorageService, private bookService: BookstorageService) { }
 
   ngOnInit(): void {
+    this.loadBooks();
+
+  }
+
+  loadBooks(){
+    this.books = [];
     this.user = this.tokenStorageService.getUser();
     this.userService.getSubscribedBooks(this.user.id).subscribe(
       data => {
@@ -53,7 +59,6 @@ export class BoardUserComponent implements OnInit {
         console.error(error);
       }
     );
-
   }
 
   onClick(book : any) : void {
@@ -62,41 +67,37 @@ export class BoardUserComponent implements OnInit {
 
   onCancelSubscription(bookId : any) : void {
     let subs : any[] = this.tokenStorageService.getUser().subscriptions;
-    let subId = null;
+    let subId:number;
     for(let sub of subs){
       if(bookId === sub.bookId) {
         subId = sub.id;
+        this.cancelSubscription(subId);
       }
     }
+    
+  }
+
+  cancelSubscription(subId:number){
     this.userService.cancelSubscription(subId, this.tokenStorageService.getUser().id).subscribe(
       data=>{
         console.log(data);
-        this.tokenStorageService.reloadUser(this.tokenStorageService.getUser().id);
-        window.location.reload();
+        let user = this.tokenStorageService.getUser();
+        let subs = user.subscriptions;
+        subs = subs.filter((sub: { id: number; }) => sub.id !== subId)
+        user.subscriptions = subs;
+        this.tokenStorageService.saveUser(user);
+        //this.tokenService.reloadUser(this.tokenService.getUser().id);
+        //window.location.reload()
+        this.loadBooks();
       },
       error=>{
         console.error(error);
       }
-    )
+    );
   }
 
   verifyIfLessThan24Hrs(bookId: any){
-    var currentTimestamp = Date.now();
-    var twentyFourHours = 24 * 60 * 60 * 1000;
-   
-    this.user = this.tokenStorageService.getUser();
-    let subs =  this.user.subscriptions;
-    for(let sub of subs){
-      let subscriptionTimeStamp = Date.parse(sub.subscriptionTime);
-      
-      if(bookId === sub.bookId){
-        if((currentTimestamp - subscriptionTimeStamp) > twentyFourHours){
-          return false;
-        }
-
-      }
-    }
-    return true;
+    return this.userService.verifyIfLessThan24Hrs(bookId);
   }
 
 }

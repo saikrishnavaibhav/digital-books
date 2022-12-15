@@ -60,8 +60,8 @@
             {{book.title}}
           </div>
           <div class="book-edit-container" *ngIf="isUserLoggedIn">
-            <button (click)="onSubscribe(book.id)" *ngIf="!subscribed(book.id)">subscribe</button><!-- [routerLink]="['/updateBook']"-->
-            <button (click)="onUnSubscribe(book.id)" *ngIf="subscribed(book.id)">unsubscribe</button><!-- [routerLink]="['/updateBook']"-->
+            <button (click)="onSubscribe(book.id)" *ngIf="showSubscription(book.id)">subscribe</button>
+            <button (click)="onUnSubscribe(book.id)" *ngIf="showUnSubscribe(book.id)">unsubscribe</button>
           </div>
         </div>
   </div>

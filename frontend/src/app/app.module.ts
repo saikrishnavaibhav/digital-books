@@ -10,7 +10,6 @@ import { HomeComponent } from './home/home.component';
 import { ProfileComponent } from './profile/profile.component';
 import { BoardUserComponent } from './board-user/board-user.component';
 import { authInterceptorProviders } from './_helpers/auth.interceptor';
-import { SearchbooksComponent } from './searchbooks/searchbooks.component';
 import { CreatebookComponent } from './createbook/createbook.component';
 import { AllmybooksComponent } from './allmybooks/allmybooks.component';
 import { BookdetailsComponent } from './bookdetails/bookdetails.component';
@@ -24,7 +23,6 @@ import { UpdatebookComponent } from './updatebook/updatebook.component';
     HomeComponent,
     ProfileComponent,
     BoardUserComponent,
-    SearchbooksComponent,
     CreatebookComponent,
     AllmybooksComponent,
     BookdetailsComponent,

@@ -14,6 +14,7 @@ export class HomeComponent {
   isSearchFailed = false;
   errorMessage = "";
   isUserLoggedIn = this.tokenService.getUser() !== null;
+  showSubscribe:any;
 
   searchForm : any = {
     category:null,
@@ -72,10 +73,20 @@ export class HomeComponent {
     this.isSearchSuccess = false;
   }
 
-  subscribed(bookId: any){
+  showSubscription(bookId: any){
     let subs : any[] = this.tokenService.getUser().subscriptions;
     for(let sub of subs){
       if(bookId === sub.bookId) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  showUnSubscribe(bookId:any){
+    let subs : any[] = this.tokenService.getUser().subscriptions;
+    for(let sub of subs){
+      if(bookId === sub.bookId && this.userService.verifyIfLessThan24Hrs(bookId)) {
         return true;
       }
     }
@@ -86,7 +97,17 @@ export class HomeComponent {
     this.userService.subscribeAbook(bookId, this.tokenService.getUser().id).subscribe(
       data=> {
         console.log(data);
-        this.tokenService.reloadUser(this.tokenService.getUser().id);
+        let user = this.tokenService.getUser();
+        let subs = user.subscriptions;
+        subs.push({
+          userId:user.id,
+          bookId:bookId,
+          id:data.id,
+          subscriptionTime:data.subscriptionTime,
+          active:true
+        })
+        user.subscriptions = subs;
+        this.tokenService.saveUser(user);
       },
       error => {
         console.error(error);
@@ -94,23 +115,33 @@ export class HomeComponent {
     );
   }
 
-  public onUnSubscribe(bookId: any){
+  onUnSubscribe(bookId: any){
     let subs : any[] = this.tokenService.getUser().subscriptions;
-    let subId = null;
+    let subId:number;
     for(let sub of subs){
       if(bookId === sub.bookId) {
         subId = sub.id;
+        this.cancelSubscription(subId);
       }
     }
+    
+  }
+
+  cancelSubscription(subId:number){
     this.userService.cancelSubscription(subId, this.tokenService.getUser().id).subscribe(
       data=>{
         console.log(data);
-        this.tokenService.reloadUser(this.tokenService.getUser().id);
+        let user = this.tokenService.getUser();
+        let subs = user.subscriptions;
+        subs = subs.filter((sub: { id: number; }) => sub.id !== subId)
+        user.subscriptions = subs;
+        this.tokenService.saveUser(user);
+        //this.tokenService.reloadUser(this.tokenService.getUser().id);
       },
       error=>{
         console.error(error);
       }
-    )
+    );
   }
 
 }

@@ -70,7 +70,7 @@ export class AllmybooksComponent implements OnInit {
   blockBook(bookId:any, block:any){
     this.authorService.blockBook(bookId, block).subscribe(
       data=>{
-        console.log(data);
+        console.log("book updated");
         window.location.reload();
       },
       error=>{
