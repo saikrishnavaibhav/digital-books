@@ -52,6 +52,12 @@ export class BoardUserComponent implements OnInit {
       data => {
         for(let b of data){
           this.book = b;
+          if(this.book.publishedDate != null){
+            let date = new Date(Date.parse(this.book.publishedDate));
+            this.book.publishedDate = date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
+          } else {
+            this.book.publishedDate = 'Not Available';
+          }
           this.books.push(this.book);
         }
       },
