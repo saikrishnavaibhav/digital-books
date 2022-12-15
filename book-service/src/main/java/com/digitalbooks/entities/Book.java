@@ -1,5 +1,6 @@
 package com.digitalbooks.entities;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Objects;
 import javax.persistence.Entity;
@@ -46,7 +47,7 @@ public class Book {
 	private String publisher;
 	
 	//@NotBlank
-	private Date publishedDate;
+	private Timestamp publishedDate;
 	
 	@NotBlank
 	@Size(min = 50, max = 2000)
@@ -122,7 +123,7 @@ public class Book {
 		return publishedDate;
 	}
 
-	public void setPublishedDate(Date publishedDate) {
+	public void setPublishedDate(Timestamp publishedDate) {
 		this.publishedDate = publishedDate;
 	}
 

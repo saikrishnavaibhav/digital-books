@@ -24,6 +24,7 @@ import com.digitalbooks.requests.Book;
 import com.digitalbooks.requests.SubscriptionRequest;
 import com.digitalbooks.responses.BookResponse;
 import com.digitalbooks.responses.MessageResponse;
+import com.digitalbooks.responses.SubscriptionResponse;
 import com.digitalbooks.utils.UserUtils;
 
 @Component
@@ -82,17 +83,17 @@ public class UserService {
 		if( subscription != null) {
 			int millis = 24 * 60 * 60 * 1000;
 			if (System.currentTimeMillis() - subscription.getSubscriptionTime().getTime() > millis )
-				return ResponseEntity.badRequest().body(new MessageResponse("Invalid request"));
+				return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 			 
 			
 			subscription.setActive(false);
 			subscriptionRepository.save(subscription);
-			return ResponseEntity.ok(new MessageResponse("Cancelled subscription successfully!"));
+			return ResponseEntity.ok().build();
 		}
 		return ResponseEntity.badRequest().body(new MessageResponse("Invalid Subscription"));
 	}
 
-	public ResponseEntity<MessageResponse> subscribeABook(SubscriptionRequest subscriptionRequest, Long bookId) {
+	public ResponseEntity<?> subscribeABook(SubscriptionRequest subscriptionRequest, Long bookId) {
 		
 		Subscription subscription = new Subscription();
 		subscription.setActive(subscriptionRequest.isActive());
@@ -113,16 +114,18 @@ public class UserService {
 					User user = isUserPresent.get();
 					Set<Subscription> subscriptions = user.getSubscriptions();
 					subscriptions.add(subscription);
-					userRepository.save(user);
-					return ResponseEntity.ok(new MessageResponse("subscribed successfully"));
-				} else 
-					return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.BOOKID_INVALID));
-			} else {
-				return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
+					user = userRepository.save(user);
+					Subscription savedSubscription= user.getSubscriptions().stream().filter(sub -> ((subscription.getBookId() == sub.getBookId()) && sub.isActive()))
+					.findFirst().orElse(null);
+					if(savedSubscription != null)
+						return ResponseEntity.ok(new SubscriptionResponse(savedSubscription.getId(), savedSubscription.getSubscriptionTime()));
+					
+				}
 			}
-		} else 
-			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.USERID_INVALID));
-		
+		}
+
+		return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
+
 	}
 
 	public ResponseEntity<?> createBook( Book book, Long id) {
@@ -140,7 +143,7 @@ public class UserService {
 			return ResponseEntity.ok(result.getBody());
 		}
 		
-		return ResponseEntity.badRequest().body(new MessageResponse("invalid request"));
+		return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 	}
 
 	public ResponseEntity<?> getAuthorBooks(Long authorId) {
@@ -186,6 +189,20 @@ public class UserService {
 		}
 		
 		return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
+	}
+
+
+	@SuppressWarnings("unchecked")
+	public ResponseEntity<?> searchBooks(String category, String title, String author) {
+		String uri = bookServiceHost + "/book/searchBooks?category="+category+"&title="+title+"&author="+author;
+		
+		restTemplate = new RestTemplate();
+		ResponseEntity<?> result = restTemplate.getForEntity(uri, List.class);
+		if(result.getBody() == null)
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
+		List<Book> books = (List<Book>) result.getBody();
+		if(books == null || books.isEmpty()) return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
+		return ResponseEntity.ok(books);
 	}
 	
 }

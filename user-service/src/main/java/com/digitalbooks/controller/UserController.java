@@ -2,6 +2,7 @@ package com.digitalbooks.controller;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -11,7 +12,6 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.digitalbooks.entities.Role;
@@ -200,7 +199,7 @@ public class UserController {
 	 */
 	@PostMapping("/{book-id}/subscribe")
 	@PreAuthorize("hasRole('READER')")
-	public ResponseEntity<MessageResponse> subscribeABook(@RequestBody SubscriptionRequest subscriptionRequest,
+	public ResponseEntity<?> subscribeABook(@RequestBody SubscriptionRequest subscriptionRequest,
 			@PathVariable("book-id") Long bookId) {
 		if (ObjectUtils.isEmpty(bookId))
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.BOOKID_INVALID));
@@ -215,10 +214,9 @@ public class UserController {
 	@PreAuthorize("hasRole('READER')")
 	public ResponseEntity<?> fetchSubscribedBook(@PathVariable("user-id") Long userId, @PathVariable("subscription-id") Long subscriptionId) {
 		if (ObjectUtils.isEmpty(userId) || !userRepository.existsById(userId))
-			throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, UserUtils.USERID_INVALID);
-			//return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.USERID_INVALID));
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.USERID_INVALID));
 		if (ObjectUtils.isEmpty(subscriptionId) || !subscriptionRepository.existsById(subscriptionId))
-			return ResponseEntity.badRequest().body(new MessageResponse("subscriptionId is not valid"));
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.SUBSCRIPTION_INVALID));
 
 		return userService.fetchSubscribedBook(userId,subscriptionId);
 	}
@@ -282,10 +280,10 @@ public class UserController {
 	@PostMapping("/readers/{user-id}/books/{subscription-id}/cancel-subscription")
 	@PreAuthorize("hasRole('READER')")
 	public ResponseEntity<?> cancelSubscription(@PathVariable("user-id") Long userId, @PathVariable("subscription-id") Long subscriptionId) {
-		if (ObjectUtils.isEmpty(userId))
-			return ResponseEntity.badRequest().body(new MessageResponse("user id is not valid"));
-		if (ObjectUtils.isEmpty(subscriptionId))
-			return ResponseEntity.badRequest().body(new MessageResponse("subscription id is not valid"));
+		if (Objects.isNull(userId) || userId==0)
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.USERID_INVALID));
+		if (Objects.isNull(subscriptionId) || subscriptionId==0)
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.SUBSCRIPTION_INVALID));
 		
 		
 		return userService.cancelSubscription(userId, subscriptionId);
@@ -297,10 +295,11 @@ public class UserController {
 	@GetMapping("/readers/{user-id}/books/{subscription-id}/read")
 	@PreAuthorize("hasRole('READER')")
 	public ResponseEntity<?> readBook(@PathVariable("user-id") Long userId, @PathVariable("subscription-id") Long subscriptionId) {
-		if (ObjectUtils.isEmpty(userId))
-			return ResponseEntity.badRequest().body(new MessageResponse("user id is not valid"));
-		if (ObjectUtils.isEmpty(subscriptionId))
-			return ResponseEntity.badRequest().body(new MessageResponse("subscription id is not valid"));
+		if (Objects.isNull(userId) || userId==0)
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.USERID_INVALID));
+		if (Objects.isNull(subscriptionId) || subscriptionId==0)
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.SUBSCRIPTION_INVALID));
+		
 		Subscription subscription = userService.getSubscription(userId, subscriptionId);
 		if(subscription != null && !ObjectUtils.isEmpty(subscription.getBookId()))
 		{
@@ -310,7 +309,7 @@ public class UserController {
 			MessageResponse result = restTemplate.getForObject(uri, MessageResponse.class);
 			return ResponseEntity.ok(result);
 		}
-		return ResponseEntity.badRequest().body(new MessageResponse("Invalid request"));
+		return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 		
 	}
 	
@@ -318,22 +317,12 @@ public class UserController {
 	 * Anyone can search books
 	 */
 	@GetMapping("/search")
-	@SuppressWarnings("unchecked")
 	public ResponseEntity<?> searchBooks(@RequestParam("category") String category, @RequestParam("title") String title,
 				@RequestParam("author") String author) {
 		if (ObjectUtils.isEmpty(category) && ObjectUtils.isEmpty(title) && ObjectUtils.isEmpty(author))
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 		
-		String uri = bookServiceHost + "/book/searchBooks?category="+category+"&title="+title+"&author="+author;
-			
-		restTemplate = new RestTemplate();
-		ResponseEntity<?> result = restTemplate.getForEntity(uri, List.class);
-		if(result.getBody() == null)
-			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
-		List<Book> books = (List<Book>) result.getBody();
-		if(books == null || books.isEmpty()) return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
-		return ResponseEntity.ok(books);
-		
+		return userService.searchBooks(category, title, author);
 	}
 
 	/*

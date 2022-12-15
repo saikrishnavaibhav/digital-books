@@ -6,9 +6,10 @@ public class UserUtils {
 	public static final String EMAILID_ALREADY_TAKEN = "Error: EmailId is already taken!";
 	public static final String PHONENUMBER_ALREADY_TAKEN = "Error: PhoneNumber is already taken!";
 	public static final String INVALID_REQUEST = "Invalid request";
-	public static final String BOOKID_INVALID = "bookId is not valid";
-	public static final String USERID_INVALID = "userId is not valid";
-	public static final String AUTHORID_INVALID = "Author id is not valid";
+	public static final String BOOKID_INVALID = "Invalid bookId";
+	public static final String USERID_INVALID = "Invalid userid";
+	public static final String AUTHORID_INVALID = "Invalid authorId";
+	public static final String SUBSCRIPTION_INVALID = "Invalid authorId";
 	
 	private UserUtils() {
 	}

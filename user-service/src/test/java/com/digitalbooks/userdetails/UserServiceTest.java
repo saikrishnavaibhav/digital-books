@@ -34,7 +34,6 @@ import com.digitalbooks.repositories.UserRepository;
 import com.digitalbooks.requests.Book;
 import com.digitalbooks.requests.SubscriptionRequest;
 import com.digitalbooks.responses.BookResponse;
-import com.digitalbooks.responses.MessageResponse;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -135,7 +134,7 @@ class UserServiceTest {
           .when(restTemplate.getForObject(uri, String.class))
           .thenReturn("BookFound");
     	
-        ResponseEntity<MessageResponse> res = userService.subscribeABook(getSubscriptonRequest(), 4L);
+        ResponseEntity<?> res = userService.subscribeABook(getSubscriptonRequest(), 4L);
  
         assertEquals(HttpStatus.OK, res.getStatusCode());
 	}
@@ -154,7 +153,7 @@ class UserServiceTest {
 		when(userRepository.findById(any())).thenReturn(user);
     	when( subscriptionRepository.findByBookIdAndUserId(4L,3L)).thenReturn(subsList);
     	
-        ResponseEntity<MessageResponse> res = userService.subscribeABook(getSubscriptonRequest(), 4L);
+        ResponseEntity<?> res = userService.subscribeABook(getSubscriptonRequest(), 4L);
  
         assertEquals(HttpStatus.BAD_REQUEST, res.getStatusCode());
 	}
@@ -169,14 +168,14 @@ class UserServiceTest {
           .when(restTemplate.getForObject(uri, String.class))
           .thenReturn("Invalid BookId");
     	
-        ResponseEntity<MessageResponse> res = userService.subscribeABook(getSubscriptonRequest(), 4L);
+        ResponseEntity<?> res = userService.subscribeABook(getSubscriptonRequest(), 4L);
  
         assertEquals(HttpStatus.BAD_REQUEST, res.getStatusCode());
 	}
 	
 	@Test
 	void testSubscribeABookWithUserNull() {
-        ResponseEntity<MessageResponse> res = userService.subscribeABook(getSubscriptonRequest(), 4L);
+        ResponseEntity<?> res = userService.subscribeABook(getSubscriptonRequest(), 4L);
         assertEquals(HttpStatus.BAD_REQUEST, res.getStatusCode());
 	}
 

@@ -1,5 +1,7 @@
 package com.digitalbooks.books;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,6 +32,7 @@ public class BooksService {
 			if(Boolean.TRUE.equals(bookRespository.existsByAuthorIdAndTitle(authorId, book.getTitle()))) {
 				return ResponseEntity.badRequest().body("Book with same title exists!");
 			}
+			book.setPublishedDate(Timestamp.valueOf(LocalDateTime.now()));
 			book = bookRespository.save(book);
 			logger.info("saved book : {}",book);
 		} catch (Exception exception) {
@@ -41,7 +44,6 @@ public class BooksService {
 	
 	public List<Book> getBooks(){
 		List<Book> books = bookRespository.findAll();
-		logger.info("retrieved books : {}", books);
 		return books;
 	}
 	
@@ -107,7 +109,6 @@ public class BooksService {
 
 	public List<Book> searchBooks(String category, String title, String author) {
 		List<Book> books = bookRespository.findBooksByCategoryOrTitleOrAuthor(category, title, author);
-		logger.info("books from search: {}",books);
 		return books;
 	}
 

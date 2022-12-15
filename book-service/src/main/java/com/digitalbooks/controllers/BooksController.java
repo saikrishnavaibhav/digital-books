@@ -2,6 +2,7 @@ package com.digitalbooks.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,25 +59,7 @@ public class BooksController {
 		Book book = booksService.getBook(bookId);
 		if(book == null || !book.getActive())
 			return ResponseEntity.badRequest().body(new MessageResponse("Book not found!"));
-		BookResponse bookResponse = new BookResponse();
-		bookResponse.setId(book.getId());
-		bookResponse.setActive(book.getActive());
-		bookResponse.setAuthorId(book.getAuthorId());
-		bookResponse.setAuthorName(book.getAuthorName());
-		bookResponse.setCategory(book.getCategory());
-		bookResponse.setContent(book.getContent());
-		
-//		String logo = ServletUriComponentsBuilder
-//		          .fromCurrentContextPath()
-//		          .path("/logos/")
-//		          .path(""+book.getId())
-//		          .toUriString();
-//		bookResponse.setLogo(logo);
-		bookResponse.setPrice(book.getPrice());
-		bookResponse.setPublishedDate(book.getPublishedDate());
-		bookResponse.setPublisher(book.getPublisher());
-		bookResponse.setTitle(book.getTitle());
-		return ResponseEntity.ok(bookResponse);
+		return ResponseEntity.ok(book);
 	}
 	
 	/*
@@ -88,10 +71,8 @@ public class BooksController {
 		if(bookIds.isEmpty())
 			return ResponseEntity.badRequest().body("Invalid books");
 		List<Book> book = booksService.getAllSubscribedBooks(bookIds);
-		if(book.isEmpty())
-			return ResponseEntity.badRequest().body(new MessageResponse("User not subscribed to any book"));
-		List<BookResponse> bookResponses = getBookResponses(book);
-		return ResponseEntity.ok(bookResponses);
+		
+		return ResponseEntity.ok(book);
 	}
 	
 
@@ -168,35 +149,14 @@ public class BooksController {
 	 * Anyone can search books
 	 */
 	@GetMapping("/author/{author-id}/getAuthorBooks")
-	@Cacheable("auhtorbooks")
-	public List<BookResponse> getAllAuthorBooks(@PathVariable("author-id") Long authorId) {
+	public List<Book> getAllAuthorBooks(@PathVariable("author-id") Long authorId) {
 		
-		List<BookResponse> booksList = new ArrayList<>();
-		if(ObjectUtils.isEmpty(authorId))
+		List<Book> booksList = new ArrayList<>();
+		if(Objects.isNull(authorId) || authorId == 0)
 			return booksList;
 		
-		List<Book> books = booksService.getAuthorBooks(authorId);
-		return getAuthorBooks(books);
-	}
-
-	private List<BookResponse> getAuthorBooks(List<Book> book) {
-		return book.stream().map(book1 -> {
-			BookResponse bookResponse = new BookResponse();
-				bookResponse.setId(book1.getId());
-				bookResponse.setAuthorName(book1.getAuthorName());
-				bookResponse.setCategory(book1.getCategory());
-				bookResponse.setContent(book1.getContent());
-				bookResponse.setActive(book1.getActive());
-				
-				//set logo here
-				
-				bookResponse.setPrice(book1.getPrice());
-				bookResponse.setPublishedDate(book1.getPublishedDate());
-				bookResponse.setPublisher(book1.getPublisher());
-				bookResponse.setTitle(book1.getTitle());
-				return bookResponse;
-		}).collect(Collectors.toList());
-		
+		booksList = booksService.getAuthorBooks(authorId);
+		return booksList;
 	}
 	
 	private List<BookResponse> getBookResponses(List<Book> book) {
@@ -205,13 +165,10 @@ public class BooksController {
 			bookResponse.setId(book1.getId());
 				bookResponse.setAuthorName(book1.getAuthorName());
 				bookResponse.setCategory(book1.getCategory());
-				bookResponse.setContent(book1.getContent());
 				
 				//set logo here
 				
 				bookResponse.setPrice(book1.getPrice());
-				bookResponse.setPublishedDate(book1.getPublishedDate());
-				bookResponse.setPublisher(book1.getPublisher());
 				bookResponse.setTitle(book1.getTitle());
 				return bookResponse;
 		}).collect(Collectors.toList());
