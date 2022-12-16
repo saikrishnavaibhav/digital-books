@@ -13,10 +13,11 @@ import { UserService } from '../_services/user.service';
 export class BoardUserComponent implements OnInit {
   
   content?: string;
+  isBooksAvailable=false;
   user: any = {
     id: null,
-    userName: null,
-    emailId: null,
+    username: null,
+    email: null,
     phoneNumber: null,
     roles :null,
     subscriptions:null
@@ -60,6 +61,8 @@ export class BoardUserComponent implements OnInit {
           }
           this.books.push(this.book);
         }
+        if(this.books.length===0) this.isBooksAvailable = false;
+        else this.isBooksAvailable = true;
       },
       error => {
         console.error(error);

@@ -25,3 +25,10 @@ button{
 .allbooks-container{
   font-family: 'Questrial';
 }
+
+.book-title{
+  height: fit-content;
+  width: 220px;
+  text-align: center;
+  margin-top: 10px;
+}

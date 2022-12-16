@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { TokenStorageService } from './token-storage.service';
-import { Book } from './bookstorage.service';
 
 const API_URL = 'http://localhost:8080/api/v1/digitalbooks';
 
@@ -46,10 +45,9 @@ export class UserService {
     
   }
 
-  loadUser(id: any): Observable<any>  {
-    
-    return this.http.get(API_URL +"/readers/"+id);
-  }
+  // loadUser(id: any): Observable<any>  {
+  //   return this.http.get(API_URL +"/readers/"+id);
+  // }
 
   verifyIfLessThan24Hrs(bookId: any) : boolean{
     var currentTimestamp = Date.now();

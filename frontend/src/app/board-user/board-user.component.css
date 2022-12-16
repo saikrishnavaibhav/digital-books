@@ -35,7 +35,19 @@ button{
     width: auto;
 }
 
-.title {
+.book-title{
+    height: fit-content;
+    width: 220px;
+    text-align: center;
     margin-top: 10px;
-    margin-bottom: 10px;
+}
+
+.user-details{
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.details{
+    margin-left: 10px;
+    margin-right: 10px;
 }

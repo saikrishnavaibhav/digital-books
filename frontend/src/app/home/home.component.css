@@ -54,3 +54,10 @@ button{
   border: 1px solid transparent;
   width: auto;
 }
+
+.book-title{
+  height: fit-content;
+  width: 220px;
+  text-align: center;
+  margin-top: 10px;
+}

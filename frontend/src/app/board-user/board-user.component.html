@@ -1,10 +1,20 @@
 <div class="container" ng-app="Subsciptions App" ng-controller="Subsciptions controller">
-  <h3> Active subsciptions</h3>
+  <div class="user-details">
+
+    <p class="details"><b>User name:</b> &nbsp; {{user.username}}</p>
+    <p class="details"><b>Email Id:</b> &nbsp; {{user.email}}</p>
+    <p class="details"><b>Phone number:</b> &nbsp; {{user.phoneNumber}}</p>
+
+  </div>
+  <div class="alert alert-warning" *ngIf="!isBooksAvailable">
+    No active subscribtions available!
+  </div>
+  <h3 *ngIf="isBooksAvailable"> Active subsciptions</h3>
     <div class="book-container" *ngFor="let book of books">
         <div class="book-details-container"  (click)="onClick(book)" [routerLink]="['/book', book.id]">
-          <img src="https://i.pinimg.com/474x/dd/95/a3/dd95a351f81a30205d6fd1428fd28b8d.jpg" alt="" width="250" height="200"><!--{{book.logo}}-->
+          <img src="{{book.logo}}" alt="" width="175" height="200">
           <br>
-          <p class="title"><b>Title: </b>{{book.title}}</p>
+          <p class="book-title"><b>Title: </b>{{book.title}}</p>
         </div>
         <div *ngIf="verifyIfLessThan24Hrs(book.id)">
           <button class="btn btn-primary btn-block" (click)="onCancelSubscription(book.id)" >cancel subscription</button>
