@@ -2,6 +2,7 @@ package com.digitalbooks.books;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import com.digitalbooks.entities.Book;
 import com.digitalbooks.repositories.BookRespository;
@@ -89,7 +91,6 @@ public class BooksService {
 			existedBook.setPrice(book.getPrice());
 			existedBook.setPublisher(book.getPublisher());
 			existedBook.setTitle(book.getTitle());
-			existedBook.setLogo(book.getLogo());
 			
 			bookRespository.save(existedBook);
 			return true;
@@ -108,7 +109,19 @@ public class BooksService {
 	}
 
 	public List<Book> searchBooks(String category, String title, String author) {
-		List<Book> books = bookRespository.findBooksByCategoryOrTitleOrAuthor(category, title, author);
+		logger.info("author : {}",author);
+		logger.info("category : {}",category);
+		logger.info("title : {}",title);
+		List<Book> books = new ArrayList<>();
+		if(ObjectUtils.isEmpty(category) && ObjectUtils.isEmpty(title) && !ObjectUtils.isEmpty(author))
+			books =  bookRespository.findBooksByAuthorName(author);
+		else if(ObjectUtils.isEmpty(category) && ObjectUtils.isEmpty(author) && !ObjectUtils.isEmpty(title))
+			books = bookRespository.findBooksByBookTitle(title);
+		else if(ObjectUtils.isEmpty(title) && ObjectUtils.isEmpty(author) && !ObjectUtils.isEmpty(category))
+			books =  bookRespository.findBooksByBookCategory(category);
+		else if(!ObjectUtils.isEmpty(title) && !ObjectUtils.isEmpty(author) && !ObjectUtils.isEmpty(category))
+			books = bookRespository.findBooksByCategoryOrTitleOrAuthor(category, title, author);
+		
 		return books;
 	}
 

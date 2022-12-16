@@ -165,9 +165,7 @@ public class BooksController {
 			bookResponse.setId(book1.getId());
 				bookResponse.setAuthorName(book1.getAuthorName());
 				bookResponse.setCategory(book1.getCategory());
-				
-				//set logo here
-				
+				bookResponse.setLogo(book1.getLogo());
 				bookResponse.setPrice(book1.getPrice());
 				bookResponse.setTitle(book1.getTitle());
 				return bookResponse;

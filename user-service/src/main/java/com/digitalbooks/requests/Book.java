@@ -19,10 +19,10 @@ public class Book {
 	int id;
 	
 	@Lob
-	private byte[] logo;
+	private String logo;
 	
 	@NotBlank
-	@Size(min = 3, max = 20)
+	@Size(min = 3, max = 50)
 	private String title;
 	
 	@NotBlank
@@ -57,11 +57,11 @@ public class Book {
 		this.id = id;
 	}
 
-	public byte[] getLogo() {
+	public String getLogo() {
 		return logo;
 	}
 
-	public void setLogo(byte[] logo) {
+	public void setLogo(String logo) {
 		this.logo = logo;
 	}
 
@@ -141,8 +141,7 @@ public class Book {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + Arrays.hashCode(logo);
-		result = prime * result + Objects.hash(active, authorId, authorName, category, content, id, price,
+		result = prime * result + Objects.hash(active, authorId, authorName, category, content, id, logo, price,
 				publishedDate, publisher, title);
 		return result;
 	}
@@ -158,14 +157,14 @@ public class Book {
 		Book other = (Book) obj;
 		return active == other.active && authorId == other.authorId && Objects.equals(authorName, other.authorName)
 				&& Objects.equals(category, other.category) && Objects.equals(content, other.content) && id == other.id
-				&& Arrays.equals(logo, other.logo) && Objects.equals(price, other.price)
+				&& Objects.equals(logo, other.logo) && Objects.equals(price, other.price)
 				&& Objects.equals(publishedDate, other.publishedDate) && Objects.equals(publisher, other.publisher)
 				&& Objects.equals(title, other.title);
 	}
 
 	@Override
 	public String toString() {
-		return "Book [id=" + id + ", logo=" + Arrays.toString(logo) + ", title=" + title + ", category=" + category
+		return "Book [id=" + id + ", logo=" + logo + ", title=" + title + ", category=" + category
 				+ ", price=" + price + ", authorName=" + authorName + ", authorId=" + authorId + ", publishedDate="
 				+ publishedDate + ", publisher=" + publisher + ", active=" + active + ", content=" + content + "]";
 	}

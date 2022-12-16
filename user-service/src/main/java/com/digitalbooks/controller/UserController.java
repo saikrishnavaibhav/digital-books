@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -91,6 +93,7 @@ public class UserController {
 	@Autowired
 	ObjectMapper objectMapper;
 	
+	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 	
 	/*
 	 * Guest can sign-up as reader or author to read or create books
@@ -170,6 +173,7 @@ public class UserController {
 												 userDetails.getId(), 
 												 userDetails.getUsername(), 
 												 userDetails.getEmail(), 
+												 userDetails.getPhoneNumber(),
 												 roles,
 												 subscriptions));
 	}
@@ -182,6 +186,9 @@ public class UserController {
 	public ResponseEntity<?> createABook(HttpServletRequest request, @RequestBody Book book, @PathVariable("author-id") Long id) {
 		if (ObjectUtils.isEmpty(id))
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.AUTHORID_INVALID));
+		
+		logger.debug(book.toString());
+		logger.debug("author id: {}",id);
 		
 		String jwt = jwtUtils.parseJwt(request);
 		if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
@@ -201,7 +208,7 @@ public class UserController {
 	@PreAuthorize("hasRole('READER')")
 	public ResponseEntity<?> subscribeABook(@RequestBody SubscriptionRequest subscriptionRequest,
 			@PathVariable("book-id") Long bookId) {
-		if (ObjectUtils.isEmpty(bookId))
+		if (Objects.isNull(bookId) || bookId <= 0)
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.BOOKID_INVALID));
 		
 		return userService.subscribeABook(subscriptionRequest, bookId);

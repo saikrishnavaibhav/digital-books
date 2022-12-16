@@ -79,22 +79,25 @@ public class UserService {
 	}
 
 	public ResponseEntity<?> cancelSubscription(Long userId, Long subscriptionId) {
+		logger.debug("cancel Subscription request for user: {} with subscriptionId: {}", userId, subscriptionId);
 		Subscription subscription = getSubscription(userId, subscriptionId);
 		if( subscription != null) {
-			int millis = 24 * 60 * 60 * 1000;
-			if (System.currentTimeMillis() - subscription.getSubscriptionTime().getTime() > millis )
+			int twentyFourHours = 24 * 60 * 60 * 1000;
+			if (System.currentTimeMillis() - subscription.getSubscriptionTime().getTime() > twentyFourHours )
 				return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 			 
-			
+			logger.debug("cancelling Subscription:");
 			subscription.setActive(false);
 			subscriptionRepository.save(subscription);
 			return ResponseEntity.ok().build();
 		}
+		logger.debug("Invalid Subscription");
 		return ResponseEntity.badRequest().body(new MessageResponse("Invalid Subscription"));
 	}
 
 	public ResponseEntity<?> subscribeABook(SubscriptionRequest subscriptionRequest, Long bookId) {
-		
+		logger.debug(subscriptionRequest.toString());
+		logger.debug("bookId: {}",bookId);
 		Subscription subscription = new Subscription();
 		subscription.setActive(subscriptionRequest.isActive());
 		subscription.setBookId(bookId);
@@ -117,13 +120,15 @@ public class UserService {
 					user = userRepository.save(user);
 					Subscription savedSubscription= user.getSubscriptions().stream().filter(sub -> ((subscription.getBookId() == sub.getBookId()) && sub.isActive()))
 					.findFirst().orElse(null);
-					if(savedSubscription != null)
+					if(savedSubscription != null) {
+						logger.debug("Subscription suucessful");
+						logger.debug(savedSubscription.toString());
 						return ResponseEntity.ok(new SubscriptionResponse(savedSubscription.getId(), savedSubscription.getSubscriptionTime()));
-					
+					}
 				}
 			}
 		}
-
+		logger.debug(UserUtils.INVALID_REQUEST);
 		return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 
 	}

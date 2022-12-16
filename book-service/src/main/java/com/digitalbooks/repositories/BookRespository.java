@@ -17,6 +17,15 @@ public interface BookRespository extends JpaRepository<Book, Long>{
 	
 	List<Book> findAllByAuthorId(Long authorId);
 	
-	@Query("select books from Book books where books.category = :category or books.title= :title or books.authorName=:author")
+	@Query("select books from Book books where books.category LIKE %:category% or books.title LIKE %:title% or books.authorName LIKE %:author%")
 	List<Book> findBooksByCategoryOrTitleOrAuthor(String category, String title, String author);
+	
+	@Query("select books from Book books where books.authorName LIKE %:author%")
+	List<Book> findBooksByAuthorName(String author);
+	
+	@Query("select books from Book books where books.title LIKE %:title%")
+	List<Book> findBooksByBookTitle(String title);
+	
+	@Query("select books from Book books where books.category LIKE %:category%")
+	List<Book> findBooksByBookCategory(String category);
 }

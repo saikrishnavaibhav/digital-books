@@ -22,10 +22,10 @@ public class Book {
 	Long id;
 	
 	@Lob
-	private byte[] logo;
+	private String logo;
 	
 	@NotBlank
-	@Size(min = 3, max = 20)
+	@Size(min = 3, max = 50)
 	private String title;
 	
 	@NotBlank
@@ -63,11 +63,11 @@ public class Book {
 		this.id = id;
 	}
 	
-	public byte[] getLogo() {
+	public String getLogo() {
 		return logo;
 	}
 
-	public void setLogo(byte[] logo) {
+	public void setLogo(String logo) {
 		this.logo = logo;
 	}
 
