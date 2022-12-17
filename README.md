@@ -44,3 +44,11 @@ worked on unit tests and optimising api responses and worked on css for front en
 14-12-2022
 worked on code optimization and front end view changes
 
+15-12-2022
+worked on code optimizations and backend deployments, database setup in aws
+
+16-12-2022
+worked on adding aws api gateway and front end deployment in aws
+
+17-12-2022
+worked on code optimizations, fixes and aws configurations for frontend and api gateway
