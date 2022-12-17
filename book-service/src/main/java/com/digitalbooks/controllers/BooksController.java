@@ -5,9 +5,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +27,7 @@ import com.digitalbooks.repositories.BookRespository;
 import com.digitalbooks.responses.BookResponse;
 import com.digitalbooks.responses.MessageResponse;
 
+
 @RestController
 @RequestMapping("/api/v1/digitalbooks")
 public class BooksController {
@@ -37,6 +41,8 @@ public class BooksController {
 	static final String INVALID_BOOKID= "Invalid book id";
 	
 	static final String INVALID_REQUEST= "Invalid Request";
+	
+	private static final Logger logger = LoggerFactory.getLogger(BooksController.class);
 	
 	/*
 	 * Author can create a book
@@ -71,7 +77,7 @@ public class BooksController {
 		if(bookIds.isEmpty())
 			return ResponseEntity.badRequest().body("Invalid books");
 		List<Book> book = booksService.getAllSubscribedBooks(bookIds);
-		
+	
 		return ResponseEntity.ok(book);
 	}
 	
@@ -100,6 +106,7 @@ public class BooksController {
 		if(booksService.updateBook(book, bookId, authorId)) {
 			return ResponseEntity.ok().build();
 		}
+		logger.debug("updating book: {}",bookId);
 		return ResponseEntity.badRequest().body("Book updation failed");
 	}
 
@@ -133,8 +140,8 @@ public class BooksController {
 	 */
 	@GetMapping("/book/searchBooks")
 	@Cacheable("searchedbooks")
-	public List<BookResponse> searchBooks(@RequestParam("category") String category, @RequestParam("title") String title,
-			@RequestParam("author") String author) {
+	public List<BookResponse> searchBooks(@Nullable @RequestParam("category") String category, @Nullable @RequestParam("title") String title,
+			@Nullable @RequestParam("author") String author) {
 		
 		List<BookResponse> booksList = new ArrayList<>();
 		if(ObjectUtils.isEmpty(category) && ObjectUtils.isEmpty(title) && ObjectUtils.isEmpty(author))
@@ -154,7 +161,7 @@ public class BooksController {
 		List<Book> booksList = new ArrayList<>();
 		if(Objects.isNull(authorId) || authorId == 0)
 			return booksList;
-		
+		logger.debug("retrieving books of author: {}", authorId);
 		booksList = booksService.getAuthorBooks(authorId);
 		return booksList;
 	}
@@ -168,6 +175,7 @@ public class BooksController {
 				bookResponse.setLogo(book1.getLogo());
 				bookResponse.setPrice(book1.getPrice());
 				bookResponse.setTitle(book1.getTitle());
+				logger.debug(bookResponse.toString());
 				return bookResponse;
 		}).collect(Collectors.toList());
 		

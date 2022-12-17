@@ -32,12 +32,14 @@ public class BooksService {
 		
 		try {
 			if(Boolean.TRUE.equals(bookRespository.existsByAuthorIdAndTitle(authorId, book.getTitle()))) {
+				logger.debug("same title for author : {} exists", authorId);
 				return ResponseEntity.badRequest().body("Book with same title exists!");
 			}
 			book.setPublishedDate(Timestamp.valueOf(LocalDateTime.now()));
 			book = bookRespository.save(book);
 			logger.info("saved book : {}",book);
 		} catch (Exception exception) {
+			logger.error(exception.getLocalizedMessage());
 			return ResponseEntity.internalServerError().body("Error: "+exception.getMessage());
 		}
 		
@@ -91,10 +93,11 @@ public class BooksService {
 			existedBook.setPrice(book.getPrice());
 			existedBook.setPublisher(book.getPublisher());
 			existedBook.setTitle(book.getTitle());
-			
+			logger.debug("updating book: {}", bookId);
 			bookRespository.save(existedBook);
 			return true;
 		}
+		logger.debug("invalid bookid: {} for author: {}", bookId, authorId);
 		return false;
 	}
 

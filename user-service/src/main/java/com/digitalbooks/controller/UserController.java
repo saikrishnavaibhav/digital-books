@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -272,7 +273,7 @@ public class UserController {
 	/*
 	 * Author can fetch all books created by him
 	 */
-	@GetMapping("/authors/{author-id}/getAllBooks")
+	@GetMapping("/author/{author-id}/getAllBooks")
 	@PreAuthorize("hasRole('AUTHOR')")
 	public ResponseEntity<?> getAuthorBooks(@PathVariable("author-id") Long authorId) {
 		if (ObjectUtils.isEmpty(authorId))
@@ -324,8 +325,8 @@ public class UserController {
 	 * Anyone can search books
 	 */
 	@GetMapping("/search")
-	public ResponseEntity<?> searchBooks(@RequestParam("category") String category, @RequestParam("title") String title,
-				@RequestParam("author") String author) {
+	public ResponseEntity<?> searchBooks(@Nullable @RequestParam("category") String category, @Nullable @RequestParam("title") String title,
+			@Nullable @RequestParam("author") String author) {
 		if (ObjectUtils.isEmpty(category) && ObjectUtils.isEmpty(title) && ObjectUtils.isEmpty(author))
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 		

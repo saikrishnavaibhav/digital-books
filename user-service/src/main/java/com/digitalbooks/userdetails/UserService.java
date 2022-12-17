@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -134,7 +135,7 @@ public class UserService {
 	}
 
 	public ResponseEntity<?> createBook( Book book, Long id) {
-		
+		logger.debug("calling book service to create book");
 		String uri = bookServiceHost + author + id + "/createBook";
 		ResponseEntity<?> result = restTemplate.postForObject(uri,book, ResponseEntity.class);
 		return result;
@@ -144,20 +145,26 @@ public class UserService {
 		Subscription subscription = getSubscription(userId, subscriptionId);
 		if(subscription != null && !ObjectUtils.isEmpty(subscription.getBookId())) {
 			String uri = bookServiceHost + "/book/" + subscription.getBookId() + "/getSubscribedBook";
+			logger.debug("calling book service to get subscried book: {}",subscription.getBookId());
 			ResponseEntity<?> result = restTemplate.getForEntity(uri, BookResponse.class);
-			return ResponseEntity.ok(result.getBody());
+			logger.debug("result: {}", result);
+			if(result.getStatusCode().equals(HttpStatus.OK))
+				return ResponseEntity.ok(result.getBody()); 
+			return ResponseEntity.badRequest().body(result.getBody());
 		}
 		
 		return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 	}
 
 	public ResponseEntity<?> getAuthorBooks(Long authorId) {
+		logger.debug("calling book service to get author books: {}",authorId);
 		String uri = bookServiceHost + author + authorId + "/getAuthorBooks";
 
 		return restTemplate.getForEntity(uri, List.class);
 	}
 
 	public ResponseEntity<?> updateBook(Long authorId, Long bookId, Book book) {
+		logger.debug("calling book service to update book: {}",bookId);
 		String uri = bookServiceHost + author + authorId + "/updateBook/" + bookId;
 		restTemplate.put(uri,book);
 		return ResponseEntity.ok().build();
@@ -185,11 +192,12 @@ public class UserService {
 		Set<Subscription> subscriptionsList = getSubscriptions(userId);
 		
 		if(subscriptionsList != null && !subscriptionsList.isEmpty()) {
-			
+			logger.debug("calling book service to get subscribed books of: {}",userId);
 			List<Long> bookIds = subscriptionsList.stream().filter(Subscription::isActive).map(Subscription::getBookId).collect(Collectors.toList());
 			
 			String uri = bookServiceHost + "/book/getSubscribedBooks";
 			ResponseEntity<?> result = restTemplate.postForEntity(uri, bookIds, List.class);
+			
 			return ResponseEntity.ok(result.getBody());
 		}
 		
@@ -200,7 +208,7 @@ public class UserService {
 	@SuppressWarnings("unchecked")
 	public ResponseEntity<?> searchBooks(String category, String title, String author) {
 		String uri = bookServiceHost + "/book/searchBooks?category="+category+"&title="+title+"&author="+author;
-		
+		logger.info("category: {}, title: {}, author: {}",category,title,author);
 		restTemplate = new RestTemplate();
 		ResponseEntity<?> result = restTemplate.getForEntity(uri, List.class);
 		if(result.getBody() == null)
