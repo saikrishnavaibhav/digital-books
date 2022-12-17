@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { HomeComponent } from '../home/home.component';
 import { BookstorageService } from '../_services/bookstorage.service';
 import { TokenStorageService } from '../_services/token-storage.service';
 import { UserService } from '../_services/user.service';
@@ -13,7 +12,8 @@ import { UserService } from '../_services/user.service';
 export class BoardUserComponent implements OnInit {
   
   content?: string;
-  isBooksAvailable=false;
+  activeSubscriptions=false;
+  noActiveSubscriptions = false;
   user: any = {
     id: null,
     username: null,
@@ -61,8 +61,14 @@ export class BoardUserComponent implements OnInit {
           }
           this.books.push(this.book);
         }
-        if(this.books.length===0) this.isBooksAvailable = false;
-        else this.isBooksAvailable = true;
+        if(this.books.length===0){
+         this.noActiveSubscriptions = true;
+         this.activeSubscriptions = false;
+        }
+        else {
+          this.activeSubscriptions = true;
+          this.noActiveSubscriptions = false;
+        }
       },
       error => {
         console.error(error);

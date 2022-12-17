@@ -6,10 +6,10 @@
     <p class="details"><b>Phone number:</b> &nbsp; {{user.phoneNumber}}</p>
 
   </div>
-  <div class="alert alert-warning" *ngIf="!isBooksAvailable">
+  <div class="alert alert-warning" *ngIf="noActiveSubscriptions">
     No active subscribtions available!
   </div>
-  <h3 *ngIf="isBooksAvailable"> Active subsciptions</h3>
+  <h3 *ngIf="activeSubscriptions"> Active subsciptions</h3>
     <div class="book-container" *ngFor="let book of books">
         <div class="book-details-container"  (click)="onClick(book)" [routerLink]="['/book', book.id]">
           <img src="{{book.logo}}" alt="" width="175" height="200">
