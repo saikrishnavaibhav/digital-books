@@ -28,22 +28,22 @@ export class UserService {
   }
 
   getSubscribedBooks(id: any) : Observable<any> { 
-    return this.http.get(AWS_API + '/readers/'+id+'/books');
+    return this.http.get(AWS_API + '/readers/'+id+'/books',{headers});
   }
 
   getSubscribedBook(id: any) : Observable<any> { 
-    return this.http.get(AWS_API + '/readers/'+id+'/books');
+    return this.http.get(AWS_API + '/readers/'+id+'/books',{headers});
   }
 
   subscribeAbook(bookid:any, userId:any): Observable<any> { 
     return this.http.post(AWS_API +"/"+bookid+'/subscribe', {
       bookId: bookid,
       userId: userId
-    });
+    },{headers});
   }
   
   cancelSubscription(subId:number, userId:any): Observable<any>  {
-    return this.http.post(AWS_API +"/readers/"+userId+"/books/"+subId+"/cancel-subscription",null);
+    return this.http.post(AWS_API +"/readers/"+userId+"/books/"+subId+"/cancel-subscription",null,{headers});
     
   }
 

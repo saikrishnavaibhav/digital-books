@@ -9,6 +9,8 @@ const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json',
   'Access-Control-Allow-Origin':"*" })
 };
+const headers= new HttpHeaders({ 'Content-Type': 'application/json',
+'Access-Control-Allow-Origin':"*" });
 
 @Injectable({
   providedIn: 'root'
@@ -30,12 +32,12 @@ export class AuthorService {
   }
 
   getBooksCreatedByAuthor(id: any) : Observable<any> {
-    return this.http.get(AWS_API + '/author/'+id+'/getAllBooks');
+    return this.http.get(AWS_API + '/author/'+id+'/getallbooks',httpOptions);
   }
 
   blockBook(bookId: any, block: any) {
     let queryParams = new HttpParams();
     queryParams = queryParams.append("block",block)
-    return this.http.post(AWS_API +"/author/"+this.user.id+"/books/"+bookId, null,{params:queryParams});
+    return this.http.post(AWS_API +"/author/"+this.user.id+"/books/"+bookId, null,{headers,params:queryParams});
   }
 }

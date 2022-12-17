@@ -25,7 +25,7 @@
           [(ngModel)]="book.title"
           required
           minlength="3"
-          maxlength="20"
+          maxlength="50"
           #title="ngModel"
         />
         <div class="alert-danger" *ngIf="title.errors && f.submitted">
