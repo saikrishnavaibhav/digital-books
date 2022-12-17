@@ -4,10 +4,12 @@ import { Observable } from 'rxjs';
 import { TokenStorageService } from './token-storage.service';
 
 const API_URL = 'http://localhost:8080/api/v1/digitalbooks';
+const AWS_API = 'https://bbm2n87aoc.execute-api.ap-northeast-1.amazonaws.com/UAT/';
 
-const httpOptions = {
-  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-};
+
+  const headers= new HttpHeaders({ 'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin':"*" });
+
 
 @Injectable({
   providedIn: 'root'
@@ -22,26 +24,26 @@ export class UserService {
                               .append("title",title)
                               .append("author",author);
 
-    return this.http.get(API_URL + '/search', {params:queryParams});
+    return this.http.get(AWS_API + '/search', {headers, params:queryParams});
   }
 
   getSubscribedBooks(id: any) : Observable<any> { 
-    return this.http.get(API_URL + '/readers/'+id+'/books');
+    return this.http.get(AWS_API + '/readers/'+id+'/books');
   }
 
   getSubscribedBook(id: any) : Observable<any> { 
-    return this.http.get(API_URL + '/readers/'+id+'/books');
+    return this.http.get(AWS_API + '/readers/'+id+'/books');
   }
 
   subscribeAbook(bookid:any, userId:any): Observable<any> { 
-    return this.http.post(API_URL +"/"+bookid+'/subscribe', {
+    return this.http.post(AWS_API +"/"+bookid+'/subscribe', {
       bookId: bookid,
       userId: userId
     });
   }
   
   cancelSubscription(subId:number, userId:any): Observable<any>  {
-    return this.http.post(API_URL +"/readers/"+userId+"/books/"+subId+"/cancel-subscription",null);
+    return this.http.post(AWS_API +"/readers/"+userId+"/books/"+subId+"/cancel-subscription",null);
     
   }
 

@@ -17,9 +17,9 @@ export class HomeComponent {
   showSubscribe:any;
 
   searchForm : any = {
-    category:null,
-    title:null,
-    author:null
+    category:"",
+    title:"",
+    author:""
   };
   
   books : any[] = []
