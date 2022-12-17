@@ -52,7 +52,13 @@
   <div class="search-container" ng-app="Subsciptions App" ng-controller="Subsciptions controller" *ngIf="isSearchSuccess">
     <button (click)="oncancelSearch()">cancel search</button>
     <br>
-    <h5>Books related to search</h5>   
+    <h5>Books related to search</h5>
+    <div class="alert alert-success" *ngIf="showSuccess">
+      {{successMessage}}
+    </div>
+    <div class="alert alert-warning" *ngIf="showWarningMessage">
+      {{warningMessage}}
+    </div>
       <div class="book-container" *ngFor="let book of books">
           <div class="book-details-container"  (click)="onClick(book)">
             <img src="{{book.logo}}" alt="" width="175" height="200">

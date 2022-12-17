@@ -6,6 +6,9 @@
     <p class="details"><b>Phone number:</b> &nbsp; {{user.phoneNumber}}</p>
 
   </div>
+  <div class="alert alert-success" *ngIf="showSuccess">
+    {{successMessage}}
+  </div>
   <div class="alert alert-warning" *ngIf="noActiveSubscriptions">
     No active subscribtions available!
   </div>

@@ -14,6 +14,9 @@ export class BoardUserComponent implements OnInit {
   content?: string;
   activeSubscriptions=false;
   noActiveSubscriptions = false;
+  showSuccess=false;
+  successMessage="";
+
   user: any = {
     id: null,
     username: null,
@@ -101,8 +104,12 @@ export class BoardUserComponent implements OnInit {
         subs = subs.filter((sub: { id: number; }) => sub.id !== subId)
         user.subscriptions = subs;
         this.tokenStorageService.saveUser(user);
-        //this.tokenService.reloadUser(this.tokenService.getUser().id);
-        //window.location.reload()
+        this.successMessage="Cancelled subscription successfully!";
+        this.showSuccess=true;
+        setTimeout(() => {
+          this.showSuccess=false;
+          this.successMessage="";
+        }, 2500);
         this.loadBooks();
       },
       error=>{

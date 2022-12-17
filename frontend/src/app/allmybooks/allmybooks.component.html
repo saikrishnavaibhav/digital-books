@@ -3,6 +3,12 @@
   <div class="alert alert-warning" *ngIf="!isBooksAvailable">
     {{user.username}} haven't created any books yet
   </div>
+  <div class="alert alert-success" *ngIf="showSuccess">
+    {{successMessage}}
+  </div>
+  <div class="alert alert-error" *ngIf="showErrorMessage">
+    {{errorMessage}}
+  </div>
     <div class="book-container" *ngFor="let book of books">
       <div class="book-item">
           <div class="book-details-container"  (click)="onClick(book)" [routerLink]="['/book', book.id]">

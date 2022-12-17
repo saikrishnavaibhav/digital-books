@@ -11,6 +11,10 @@ import { TokenStorageService } from '../_services/token-storage.service';
 export class AllmybooksComponent implements OnInit {
 
   isBooksAvailable = false;
+  showSuccess=false;
+  successMessage="";
+  showErrorMessage=false;
+  errorMessage="";
 
   user: any = {
     id: null,
@@ -73,22 +77,34 @@ export class AllmybooksComponent implements OnInit {
 
   onBlock(bookId : any) : void {
     console.log("blocking : " + bookId);
-    this.blockBook(bookId,"yes");
+    this.blockBook(bookId,"yes","blocked");
   }
 
   onUnblock(bookId : any) : void {
     console.log("unblocking : "+bookId);
-    this.blockBook(bookId,"no");
+    this.blockBook(bookId,"no","unblocked");
   }
 
-  blockBook(bookId:any, block:any){
+  blockBook(bookId:any, block:any, message:String){
     this.authorService.blockBook(bookId, block).subscribe(
       data=>{
         console.log("book updated");
         this.modifyBooksDataOfAuthor(bookId, block);
+        this.successMessage="Book "+message+" successfully!";
+        this.showSuccess=true;
+        setTimeout(() => {
+          this.showSuccess=false;
+          this.successMessage="";
+        }, 2500);
       },
       error=>{
         console.error(error);
+        this.errorMessage="Failed to "+message.substring(0,message.length-2)+" book!";
+        this.showErrorMessage=true;
+        setTimeout(() => {
+          this.showErrorMessage=false;
+          this.errorMessage="";
+        }, 2500);
       }
     );
   }

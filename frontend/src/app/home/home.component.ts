@@ -15,6 +15,10 @@ export class HomeComponent {
   errorMessage = "";
   isUserLoggedIn = this.tokenService.getUser() !== null;
   showSubscribe:any;
+  showSuccess=false;
+  successMessage="";
+  showWarningMessage=false;
+  warningMessage="";
 
   searchForm : any = {
     category:"",
@@ -65,8 +69,13 @@ export class HomeComponent {
 
   onClick(book:any){
     if(!this.isUserLoggedIn){
-      console.log("please login/signup");
+      this.showWarningMessage= true;
+      this.warningMessage="Please Signup/signin into your account!"; 
     }
+    setTimeout(() => {
+      this.showWarningMessage=false;
+      this.warningMessage="";
+    }, 2500);
   }
 
   oncancelSearch(){
@@ -108,6 +117,12 @@ export class HomeComponent {
         })
         user.subscriptions = subs;
         this.tokenService.saveUser(user);
+        this.successMessage="Subscription successful!";
+        this.showSuccess=true;
+        setTimeout(() => {
+          this.showSuccess=false;
+          this.successMessage="";
+        }, 2500);
       },
       error => {
         console.error(error);
@@ -136,7 +151,12 @@ export class HomeComponent {
         subs = subs.filter((sub: { id: number; }) => sub.id !== subId)
         user.subscriptions = subs;
         this.tokenService.saveUser(user);
-        //this.tokenService.reloadUser(this.tokenService.getUser().id);
+        this.successMessage="Cancelled subscription successfully!";
+        this.showSuccess=true;
+        setTimeout(() => {
+          this.showSuccess=false;
+          this.successMessage="";
+        }, 2500);
       },
       error=>{
         console.error(error);
