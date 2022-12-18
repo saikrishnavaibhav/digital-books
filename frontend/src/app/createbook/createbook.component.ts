@@ -10,6 +10,8 @@ export class CreatebookComponent {
   
   isSuccessful = false;
   errorMessage = "";
+  haveLogo=false;
+
   book : any = {
     logo: null,
     title: null,
@@ -35,6 +37,11 @@ export class CreatebookComponent {
     })
   }
 
-
+  showLogoInput(){
+    if(this.haveLogo === true)
+      this.haveLogo = false;
+    else
+      this.haveLogo=true;
+  }
 
 }
