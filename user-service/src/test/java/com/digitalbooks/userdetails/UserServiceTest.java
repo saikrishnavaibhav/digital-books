@@ -133,6 +133,7 @@ class UserServiceTest {
         Mockito
           .when(restTemplate.getForObject(uri, String.class))
           .thenReturn("BookFound");
+        when(userRepository.save(any())).thenReturn(user.get());
     	
         ResponseEntity<?> res = userService.subscribeABook(getSubscriptonRequest(), 4L);
  
@@ -204,6 +205,19 @@ class UserServiceTest {
 	}
 	
 	@Test
+	void testFetchSubscribedBookForBadRequest() {
+		Subscription subscription = getSubscripton();
+		when(userRepository.findById(anyLong())).thenReturn(getUser());
+		String uri = bookServiceHost + "/book/" + subscription.getBookId() + "/getSubscribedBook";
+		
+		 Mockito
+         .when(restTemplate.getForEntity(uri, BookResponse.class))
+         .thenReturn(ResponseEntity.badRequest().build());
+		 ResponseEntity<?> res = userService.fetchSubscribedBook(subscription.getUserId(), subscription.getId());
+		 assertEquals(HttpStatus.BAD_REQUEST, res.getStatusCode());
+	}
+	
+	@Test
 	void testFetchSubscribedBookForError() {
 		Subscription subscription = getSubscripton();
 		ResponseEntity<?> res = userService.fetchSubscribedBook(subscription.getUserId(), subscription.getId());
@@ -267,6 +281,53 @@ class UserServiceTest {
 		when(userRepository.findById(any())).thenReturn(user);
 		
 		ResponseEntity<?> result = userService.fetchAllSubscribedBooks(3L);
+		assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+	}
+	
+	@Test
+	void TestSearchBooks() {
+		String uri = bookServiceHost + "/book/searchBooks?category=category&title=title&author=author";
+		String category="category";
+		String title="title";
+		String author="author";
+		Mockito
+        .when(restTemplate.getForEntity(uri, List.class))
+        .thenReturn(ResponseEntity.ok().body(new ArrayList<>()));
+		
+		ResponseEntity<?> result = userService.searchBooks(category, title, author);
+		assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+		
+	}
+	
+	@Test
+	void TestSearchBooksForEmptyResponse() {
+		String uri = bookServiceHost + "/book/searchBooks?category=category&title=title&author=author";
+		String category="category";
+		String title="title";
+		String author="author";
+		List<Book> books = new ArrayList<>();
+		books.add(new Book());
+		Mockito
+        .when(restTemplate.getForEntity(uri, List.class))
+        .thenReturn(ResponseEntity.ok().body(books));
+		
+		ResponseEntity<?> result = userService.searchBooks(category, title, author);
+		assertEquals(HttpStatus.OK, result.getStatusCode());
+	}
+	
+	@Test
+	void TestSearchBooksForNullResponse() {
+		String uri = bookServiceHost + "/book/searchBooks?category=category&title=title&author=author";
+		String category="category";
+		String title="title";
+		String author="author";
+		List<Book> books = new ArrayList<>();
+		books.add(new Book());
+		Mockito
+        .when(restTemplate.getForEntity(uri, List.class))
+        .thenReturn(ResponseEntity.ok().body(null));
+		
+		ResponseEntity<?> result = userService.searchBooks(category, title, author);
 		assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
 	}
 

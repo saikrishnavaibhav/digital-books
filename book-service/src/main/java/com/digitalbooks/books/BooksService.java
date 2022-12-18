@@ -76,7 +76,7 @@ public class BooksService {
 
 			Book book1 = bookRespository.save(book);
 			if(book1.getActive() != block) {
-				logger.info("book {} updated to active status: {}", bookId, block);
+				logger.info("book {} updated to active status: {}", bookId, !block);
 				return true;
 			} else 
 				return false;

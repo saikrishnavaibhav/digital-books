@@ -170,15 +170,15 @@ public class UserService {
 		return ResponseEntity.ok().build();
 	}
 
-	public ResponseEntity<?> getUserDetails(Long id, String username) {
-		Optional<User> isUserPresent = userRepository.findById(id);
-		if(isUserPresent.isPresent() && username.equals(isUserPresent.get().getUserName())) {
-			User user = isUserPresent.get();
-			user.setSubscriptions(user.getSubscriptions().stream().filter(Subscription::isActive).collect(Collectors.toSet()));
-			return ResponseEntity.ok(isUserPresent.get());
-		}
-		return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
-	}
+//	public ResponseEntity<?> getUserDetails(Long id, String username) {
+//		Optional<User> isUserPresent = userRepository.findById(id);
+//		if(isUserPresent.isPresent() && username.equals(isUserPresent.get().getUserName())) {
+//			User user = isUserPresent.get();
+//			user.setSubscriptions(user.getSubscriptions().stream().filter(Subscription::isActive).collect(Collectors.toSet()));
+//			return ResponseEntity.ok(isUserPresent.get());
+//		}
+//		return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
+//	}
 
 
 	public ResponseEntity<?> blockBook(Long bookId, Long authorId, boolean block) {
@@ -209,7 +209,6 @@ public class UserService {
 	public ResponseEntity<?> searchBooks(String category, String title, String author) {
 		String uri = bookServiceHost + "/book/searchBooks?category="+category+"&title="+title+"&author="+author;
 		logger.info("category: {}, title: {}, author: {}",category,title,author);
-		restTemplate = new RestTemplate();
 		ResponseEntity<?> result = restTemplate.getForEntity(uri, List.class);
 		if(result.getBody() == null)
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));

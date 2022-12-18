@@ -37,7 +37,7 @@ public class PasswordConstraintValidator implements ConstraintValidator<ValidPas
         }
         context.disableDefaultConstraintViolation();
         context.buildConstraintViolationWithTemplate(
-				String.join(" ", validator.getMessages(result)))
+				String.join("\n", validator.getMessages(result)))
           .addConstraintViolation();
         return false;
     }

@@ -335,7 +335,7 @@ public class UserController {
 
 	/*
 	 * get user details
-	 */
+	 
 	@GetMapping("/readers/{user-id}")
 	public ResponseEntity<?> getUserDetails(@PathVariable("user-id") Long id, HttpServletRequest httpServletRequest){
 		if (id == null)
@@ -354,5 +354,5 @@ public class UserController {
 	@RequestMapping("/getMessage")
 	String getMessage() {
 		return this.message;
-	}
+	}*/
 }
