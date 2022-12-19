@@ -11,6 +11,7 @@ import { TokenStorageService } from '../_services/token-storage.service';
 export class AllmybooksComponent implements OnInit {
 
   isBooksAvailable = false;
+  showNoBooksByAuthor=false;
   showSuccess=false;
   successMessage="";
   showErrorMessage=false;
@@ -52,8 +53,14 @@ export class AllmybooksComponent implements OnInit {
     this.authorService.getBooksCreatedByAuthor(this.user.id).subscribe(
       data  => {
         let booksOfAuthor:any[] = data;
-        if(booksOfAuthor.length === 0) this.isBooksAvailable = false;
-        else this.isBooksAvailable = true;
+        if(booksOfAuthor.length === 0) {
+          this.isBooksAvailable = false;
+          this.showNoBooksByAuthor = true;
+        }
+        else {
+          this.isBooksAvailable = true;
+          this.showNoBooksByAuthor = false;
+        }
         for(let b of data){
           this.book = b;
           if(this.book.publishedDate != null){
@@ -63,6 +70,7 @@ export class AllmybooksComponent implements OnInit {
             this.book.publishedDate = 'Not Available';
           }
           this.books.push(this.book);
+
         }
       },
       error => {

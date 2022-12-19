@@ -1,6 +1,6 @@
 <div class="allbooks-container" ng-app="books App" ng-controller="books controller">
   <h5 *ngIf="isBooksAvailable">Books created by {{user.username}}</h5>
-  <div class="alert alert-warning" *ngIf="!isBooksAvailable">
+  <div class="alert alert-warning" *ngIf="showNoBooksByAuthor">
     {{user.username}} haven't created any books yet
   </div>
   <div class="alert alert-success" *ngIf="showSuccess">
@@ -12,7 +12,7 @@
     <div class="book-container" *ngFor="let book of books">
       <div class="book-item">
           <div class="book-details-container"  (click)="onClick(book)" [routerLink]="['/book', book.id]">
-            <img src="{{book.logo}}" alt="" width="175" height="200"><!--{{book.logo}}-->
+            <img src="{{book.logo}}" alt="" width="175" height="200">
             <br>
             <p class = "book-title">{{book.title}}</p>
           </div>
