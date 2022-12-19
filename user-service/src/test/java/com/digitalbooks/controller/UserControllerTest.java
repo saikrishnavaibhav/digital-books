@@ -3,6 +3,7 @@ package com.digitalbooks.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -29,10 +30,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.digitalbooks.DigitalbooksUserApplication;
-import com.digitalbooks.entities.Subscription;
 import com.digitalbooks.repositories.SubscriptionRepository;
 import com.digitalbooks.repositories.UserRepository;
-import com.digitalbooks.responses.BookResponse;
 import com.digitalbooks.userdetails.UserService;
 import com.digitalbooks.utils.UserUtils;
 
@@ -186,7 +185,7 @@ class UserControllerTest {
 
 	@WithMockUser(roles="READER")
 	@Test
-	void testSusbcribeABook() throws Exception {
+	void testSubscribeABook() throws Exception {
 		
 		when(userService.subscribeABook(any(), anyLong())).thenReturn(ResponseEntity.ok().build());
 		
@@ -203,12 +202,72 @@ class UserControllerTest {
 	
 	@WithMockUser(roles="READER")
 	@Test
+	void testSubscribeABookForError() throws Exception {
+		
+		when(userService.subscribeABook(any(), anyLong())).thenReturn(ResponseEntity.badRequest().build());
+		
+		mockMvc.perform(post("/api/v1/digitalbooks/{book-id}/subscribe",0)
+				   .contentType(MediaType.APPLICATION_JSON)
+				   .content("{\r\n"
+				   		+ "    \"bookId\": 2,\r\n"
+				   		+ "	\"userId\": 3,\r\n"
+				   		+ "	\"active\": true,\r\n"
+				   		+ "	\"subscriptionTime\": \"2022-12-04 16:19:00.100\"\r\n"
+				   		+ "}")						
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+	}
+	
+	@WithMockUser(roles="READER")
+	@Test
+	void testFetchSusbcribedBook() throws Exception {
+		when(userRepository.existsById(2L)).thenReturn(true);
+		when(subscriptionRepository.existsById(2L)).thenReturn(true);
+		when(userService.fetchSubscribedBook(anyLong(), anyLong())).thenReturn(ResponseEntity.ok().build());
+		
+		mockMvc.perform(get("/api/v1/digitalbooks/readers/{user-id}/books/{subscription-id}",2,2)						
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+	}
+	
+	@WithMockUser(roles="READER")
+	@Test
+	void testFetchSusbcribedBookForError() throws Exception {
+		when(userRepository.existsById(2L)).thenReturn(false);
+		when(subscriptionRepository.existsById(2L)).thenReturn(false);
+		when(userService.fetchSubscribedBook(anyLong(), anyLong())).thenReturn(ResponseEntity.badRequest().build());
+		
+		mockMvc.perform(get("/api/v1/digitalbooks/readers/{user-id}/books/{subscription-id}",2,2)						
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+	}
+	
+	@WithMockUser(roles="READER")
+	@Test
+	void testFetchSusbcribedBookForSubscriptionError() throws Exception {
+		when(userRepository.existsById(2L)).thenReturn(true);
+		when(subscriptionRepository.existsById(2L)).thenReturn(false);
+		when(userService.fetchSubscribedBook(anyLong(), anyLong())).thenReturn(ResponseEntity.badRequest().build());
+		
+		mockMvc.perform(get("/api/v1/digitalbooks/readers/{user-id}/books/{subscription-id}",2,2)						
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+	}
+	
+	@WithMockUser(roles="READER")
+	@Test
 	void testFetchAllSusbcribeABooks() throws Exception {
 		
 		when(userService.fetchAllSubscribedBooks(anyLong())).thenReturn(ResponseEntity.ok().build());
 		
 		mockMvc.perform(get("/api/v1/digitalbooks/readers/{user-id}/books",2)					
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+	}
+	
+	@WithMockUser(roles="READER")
+	@Test
+	void testFetchAllSusbcribeABooksForError() throws Exception {
+		
+		when(userService.fetchAllSubscribedBooks(anyLong())).thenReturn(ResponseEntity.badRequest().build());
+		
+		mockMvc.perform(get("/api/v1/digitalbooks/readers/{user-id}/books",0L)					
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
 	}
 	
 	@WithMockUser(roles="AUTHOR")
@@ -220,6 +279,28 @@ class UserControllerTest {
 		mockMvc.perform(post("/api/v1/digitalbooks/author/{author-id}/books/{book-id}",2,2)
 				.queryParam("block", "true")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+	}
+	
+	@WithMockUser(roles="AUTHOR")
+	@Test
+	void testBlockABookForAuthorError() throws Exception {
+		
+		when(userService.blockBook(anyLong(), anyLong(), anyBoolean())).thenReturn(ResponseEntity.badRequest().build());
+		
+		mockMvc.perform(post("/api/v1/digitalbooks/author/{author-id}/books/{book-id}",0,2)
+				.queryParam("block", "true")
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+	}
+	
+	@WithMockUser(roles="AUTHOR")
+	@Test
+	void testBlockABookForBookError() throws Exception {
+		
+		when(userService.blockBook(anyLong(), anyLong(), anyBoolean())).thenReturn(ResponseEntity.badRequest().build());
+		
+		mockMvc.perform(post("/api/v1/digitalbooks/author/{author-id}/books/{book-id}",2,0)
+				.queryParam("block", "true")
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
 	}
 	
 	@WithMockUser(roles="AUTHOR")
@@ -248,6 +329,54 @@ class UserControllerTest {
 	
 	@WithMockUser(roles="AUTHOR")
 	@Test
+	void testUpdateABookForAuthorError() throws Exception {
+		
+		when(userService.updateBook(anyLong(), anyLong(), any())).thenReturn(ResponseEntity.badRequest().build());
+		
+		mockMvc.perform(put("/api/v1/digitalbooks/author/{author-id}/updateBook/{book-id}",0,2)
+				.contentType(MediaType.APPLICATION_JSON)
+			   .content("{\r\n"
+			   		+ "        \"id\": 1,\r\n"
+			   		+ "        \"logo\": \"https://m.media-amazon.com/images/W/WEBP_402378-T1/images/I/5163N91r6lL._SY300_.jpg\",\r\n"
+			   		+ "        \"title\": \"A Game of Thrones (A Song of Ice and Fire, Book 1)\",\r\n"
+			   		+ "        \"category\": \"FICTION\",\r\n"
+			   		+ "        \"price\": 499,\r\n"
+			   		+ "        \"authorId\": 1,\r\n"
+			   		+ "        \"authorName\": \"RRMARTIN\",\r\n"
+			   		+ "        \"publisher\": \"Bantam, Media tie-in\",\r\n"
+			   		+ "        \"publishedDate\": \"2022-12-16T07:25:20.000+00:00\",\r\n"
+			   		+ "        \"content\": \"winter.\",\r\n"
+			   		+ "        \"active\": true\r\n"
+			   		+ "    }")	
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+	}
+	
+	@WithMockUser(roles="AUTHOR")
+	@Test
+	void testUpdateABookForBookError() throws Exception {
+		
+		when(userService.updateBook(anyLong(), anyLong(), any())).thenReturn(ResponseEntity.badRequest().build());
+		
+		mockMvc.perform(put("/api/v1/digitalbooks/author/{author-id}/updateBook/{book-id}",2,0)
+				.contentType(MediaType.APPLICATION_JSON)
+			   .content("{\r\n"
+			   		+ "        \"id\": 1,\r\n"
+			   		+ "        \"logo\": \"https://m.media-amazon.com/images/W/WEBP_402378-T1/images/I/5163N91r6lL._SY300_.jpg\",\r\n"
+			   		+ "        \"title\": \"A Game of Thrones (A Song of Ice and Fire, Book 1)\",\r\n"
+			   		+ "        \"category\": \"FICTION\",\r\n"
+			   		+ "        \"price\": 499,\r\n"
+			   		+ "        \"authorId\": 1,\r\n"
+			   		+ "        \"authorName\": \"RRMARTIN\",\r\n"
+			   		+ "        \"publisher\": \"Bantam, Media tie-in\",\r\n"
+			   		+ "        \"publishedDate\": \"2022-12-16T07:25:20.000+00:00\",\r\n"
+			   		+ "        \"content\": \"winter.\",\r\n"
+			   		+ "        \"active\": true\r\n"
+			   		+ "    }")	
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+	}
+	
+	@WithMockUser(roles="AUTHOR")
+	@Test
 	void testGetAuthorBooks() throws Exception {
 		
 		when(userService.blockBook(anyLong(), anyLong(), anyBoolean())).thenReturn(ResponseEntity.ok().build());
@@ -255,23 +384,66 @@ class UserControllerTest {
 		mockMvc.perform(get("/api/v1/digitalbooks/author/{author-id}/getAllBooks",2)
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 	}
-
-	private BookResponse getBookResponse() {
-		BookResponse bookResponse = new BookResponse();
-		bookResponse.setActive(true);
-		bookResponse.setAuthorId(1L);
-		bookResponse.setAuthorName("oda");
-		bookResponse.setTitle("one piece");
-		return bookResponse;
+	
+	@WithMockUser(roles="AUTHOR")
+	@Test
+	void testGetAuthorBooksForError() throws Exception {
+		
+		when(userService.blockBook(anyLong(), anyLong(), anyBoolean())).thenReturn(ResponseEntity.badRequest().build());
+		
+		mockMvc.perform(get("/api/v1/digitalbooks/author/{author-id}/getAllBooks",0)
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+	}
+	
+	@WithMockUser(roles="READER")
+	@Test
+	void testCancelSubscription() throws Exception {
+		
+		when(userService.cancelSubscription(any(), anyLong())).thenReturn(ResponseEntity.ok().build());
+		
+		mockMvc.perform(post("/api/v1/digitalbooks/readers/{user-id}/books/{subscription-id}/cancel-subscription",2,2)						
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+	}
+	
+	@WithMockUser(roles="READER")
+	@Test
+	void testCancelSubscriptionForUserError() throws Exception {
+		
+		when(userService.cancelSubscription(any(), anyLong())).thenReturn(ResponseEntity.badRequest().build());
+		
+		mockMvc.perform(post("/api/v1/digitalbooks/readers/{user-id}/books/{subscription-id}/cancel-subscription",0,2)						
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+	}
+	
+	@WithMockUser(roles="READER")
+	@Test
+	void testCancelSubscriptionForSubscriptionError() throws Exception {
+		
+		when(userService.cancelSubscription(any(), anyLong())).thenReturn(ResponseEntity.badRequest().build());
+		
+		mockMvc.perform(post("/api/v1/digitalbooks/readers/{user-id}/books/{subscription-id}/cancel-subscription",2,0)						
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+	}
+	
+	@Test
+	void testSearchBooksForBadRequest() throws Exception {
+		
+		when(userService.searchBooks(any(), any(), any())).thenReturn(ResponseEntity.badRequest().build());
+		
+		mockMvc.perform(get("/api/v1/digitalbooks/search")
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
 	}
 
-	private Subscription getSubscripton() {
-		Subscription sub = new Subscription();
-		sub.setActive(true);
-		sub.setBookId(4L);
-		sub.setId(4L);
-		sub.setSubscriptionTime("2022-12-04 16:19:00.100");
-		sub.setUserId(3L);
-		return sub;
+	@Test
+	void testSearchBooks() throws Exception {
+		
+		when(userService.searchBooks(anyString(), anyString(), anyString())).thenReturn(ResponseEntity.ok().build());
+		
+		mockMvc.perform(get("/api/v1/digitalbooks/search")
+				.param("category", "category")
+				.param("title", "title")
+				.param("author", "author")
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 	}
+	
 }

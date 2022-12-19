@@ -235,7 +235,7 @@ public class UserController {
 	@GetMapping("/readers/{user-id}/books")
 	@PreAuthorize("hasRole('READER')")
 	public ResponseEntity<?> fetchAllSubscribedBooks(@PathVariable("user-id") Long userId) {
-		if (ObjectUtils.isEmpty(userId))
+		if (Objects.isNull(userId) || userId<=0)
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.USERID_INVALID));
 		
 		return userService.fetchAllSubscribedBooks(userId);
@@ -247,9 +247,9 @@ public class UserController {
 	@PostMapping("/author/{author-id}/books/{book-id}")
 	@PreAuthorize("hasRole('AUTHOR')")
 	public ResponseEntity<?> blockABook(@PathVariable("author-id") Long authorId, @PathVariable("book-id") Long bookId, @RequestParam("block") boolean block) {
-		if (ObjectUtils.isEmpty(authorId))
+		if (Objects.isNull(authorId) || authorId<=0)
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.AUTHORID_INVALID));
-		if (ObjectUtils.isEmpty(bookId))
+		if (Objects.isNull(bookId) || bookId<=0)
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.BOOKID_INVALID));
 		
 		return userService.blockBook(bookId,authorId,block);
@@ -261,9 +261,9 @@ public class UserController {
 	@PutMapping("/author/{author-id}/updateBook/{book-id}")
 	@PreAuthorize("hasRole('AUTHOR')")
 	public ResponseEntity<?> updateABook(@RequestBody Book book, @PathVariable("author-id") Long authorId, @PathVariable("book-id") Long bookId) {
-		if (ObjectUtils.isEmpty(authorId))
+		if (Objects.isNull(authorId) || authorId<=0)
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.AUTHORID_INVALID));
-		if (ObjectUtils.isEmpty(bookId))
+		if (Objects.isNull(bookId) || bookId<=0)
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.BOOKID_INVALID));
 		
 		
@@ -276,7 +276,7 @@ public class UserController {
 	@GetMapping("/author/{author-id}/getAllBooks")
 	@PreAuthorize("hasRole('AUTHOR')")
 	public ResponseEntity<?> getAuthorBooks(@PathVariable("author-id") Long authorId) {
-		if (ObjectUtils.isEmpty(authorId))
+		if (Objects.isNull(authorId) || authorId<=0)
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.AUTHORID_INVALID));
 		
 		return userService.getAuthorBooks(authorId);
@@ -298,8 +298,20 @@ public class UserController {
 	}
 
 	/*
-	 * Reader can a read a subscribed book
+	 * Anyone can search books
 	 */
+	@GetMapping("/search")
+	public ResponseEntity<?> searchBooks(@Nullable @RequestParam("category") String category, @Nullable @RequestParam("title") String title,
+			@Nullable @RequestParam("author") String author) {
+		if (ObjectUtils.isEmpty(category) && ObjectUtils.isEmpty(title) && ObjectUtils.isEmpty(author))
+			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
+		
+		return userService.searchBooks(category, title, author);
+	}
+
+	/*
+	 * Reader can a read a subscribed book
+	 
 	@GetMapping("/readers/{user-id}/books/{subscription-id}/read")
 	@PreAuthorize("hasRole('READER')")
 	public ResponseEntity<?> readBook(@PathVariable("user-id") Long userId, @PathVariable("subscription-id") Long subscriptionId) {
@@ -320,18 +332,8 @@ public class UserController {
 		return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 		
 	}
+	*/
 	
-	/*
-	 * Anyone can search books
-	 */
-	@GetMapping("/search")
-	public ResponseEntity<?> searchBooks(@Nullable @RequestParam("category") String category, @Nullable @RequestParam("title") String title,
-			@Nullable @RequestParam("author") String author) {
-		if (ObjectUtils.isEmpty(category) && ObjectUtils.isEmpty(title) && ObjectUtils.isEmpty(author))
-			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
-		
-		return userService.searchBooks(category, title, author);
-	}
 
 	/*
 	 * get user details
