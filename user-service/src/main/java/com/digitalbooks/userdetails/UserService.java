@@ -80,25 +80,25 @@ public class UserService {
 	}
 
 	public ResponseEntity<?> cancelSubscription(Long userId, Long subscriptionId) {
-		logger.debug("cancel Subscription request for user: {} with subscriptionId: {}", userId, subscriptionId);
+		logger.info("cancel Subscription request for user: {} with subscriptionId: {}", userId, subscriptionId);
 		Subscription subscription = getSubscription(userId, subscriptionId);
 		if( subscription != null) {
 			int twentyFourHours = 24 * 60 * 60 * 1000;
 			if (System.currentTimeMillis() - subscription.getSubscriptionTime().getTime() > twentyFourHours )
 				return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 			 
-			logger.debug("cancelling Subscription:");
+			logger.info("cancelling Subscription:");
 			subscription.setActive(false);
 			subscriptionRepository.save(subscription);
 			return ResponseEntity.ok().build();
 		}
-		logger.debug("Invalid Subscription");
+		logger.info("Invalid Subscription");
 		return ResponseEntity.badRequest().body(new MessageResponse("Invalid Subscription"));
 	}
 
 	public ResponseEntity<?> subscribeABook(SubscriptionRequest subscriptionRequest, Long bookId) {
-		logger.debug(subscriptionRequest.toString());
-		logger.debug("bookId: {}",bookId);
+		logger.info(subscriptionRequest.toString());
+		logger.info("bookId: {}",bookId);
 		Subscription subscription = new Subscription();
 		subscription.setActive(subscriptionRequest.isActive());
 		subscription.setBookId(bookId);
@@ -119,25 +119,26 @@ public class UserService {
 					Set<Subscription> subscriptions = user.getSubscriptions();
 					subscriptions.add(subscription);
 					user = userRepository.save(user);
-					Subscription savedSubscription= user.getSubscriptions().stream().filter(sub -> ((subscription.getBookId() == sub.getBookId()) && sub.isActive()))
+					Subscription savedSubscription= user.getSubscriptions().stream().filter(sub -> (subscription.getBookId().equals(sub.getBookId()) && sub.isActive()))
 					.findFirst().orElse(null);
 					if(savedSubscription != null) {
-						logger.debug("Subscription suucessful");
-						logger.debug(savedSubscription.toString());
+						logger.info("Subscription suucessful");
+						logger.info(savedSubscription.toString());
 						return ResponseEntity.ok(new SubscriptionResponse(savedSubscription.getId(), savedSubscription.getSubscriptionTime()));
 					}
 				}
 			}
 		}
-		logger.debug(UserUtils.INVALID_REQUEST);
+		logger.info(UserUtils.INVALID_REQUEST);
 		return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.INVALID_REQUEST));
 
 	}
 
 	public ResponseEntity<?> createBook( Book book, Long id) {
-		logger.debug("calling book service to create book");
+		logger.info("calling book service to create book");
 		String uri = bookServiceHost + author + id + "/createBook";
 		ResponseEntity<?> result = restTemplate.postForObject(uri,book, ResponseEntity.class);
+		logger.info("createbook result: {}",result);
 		return result;
 	}
 
@@ -145,9 +146,9 @@ public class UserService {
 		Subscription subscription = getSubscription(userId, subscriptionId);
 		if(subscription != null && !ObjectUtils.isEmpty(subscription.getBookId())) {
 			String uri = bookServiceHost + "/book/" + subscription.getBookId() + "/getSubscribedBook";
-			logger.debug("calling book service to get subscried book: {}",subscription.getBookId());
+			logger.info("calling book service to get subscried book: {}",subscription.getBookId());
 			ResponseEntity<?> result = restTemplate.getForEntity(uri, BookResponse.class);
-			logger.debug("result: {}", result);
+			logger.info("result: {}", result);
 			if(result.getStatusCode().equals(HttpStatus.OK))
 				return ResponseEntity.ok(result.getBody()); 
 			return ResponseEntity.badRequest().body(result.getBody());
@@ -157,14 +158,14 @@ public class UserService {
 	}
 
 	public ResponseEntity<?> getAuthorBooks(Long authorId) {
-		logger.debug("calling book service to get author books: {}",authorId);
+		logger.info("calling book service to get author books: {}",authorId);
 		String uri = bookServiceHost + author + authorId + "/getAuthorBooks";
 
 		return restTemplate.getForEntity(uri, List.class);
 	}
 
 	public ResponseEntity<?> updateBook(Long authorId, Long bookId, Book book) {
-		logger.debug("calling book service to update book: {}",bookId);
+		logger.info("calling book service to update book: {}",bookId);
 		String uri = bookServiceHost + author + authorId + "/updateBook/" + bookId;
 		restTemplate.put(uri,book);
 		return ResponseEntity.ok().build();
@@ -184,6 +185,7 @@ public class UserService {
 	public ResponseEntity<?> blockBook(Long bookId, Long authorId, boolean block) {
 		String uri = bookServiceHost + "/author/" + authorId + "/blockBook/" + bookId +"?block=" + block;
 		ResponseEntity<?> result = restTemplate.getForObject(uri, ResponseEntity.class);
+		logger.info("block Book result: {}",result);
 		return result;
 	}
 
@@ -192,7 +194,7 @@ public class UserService {
 		Set<Subscription> subscriptionsList = getSubscriptions(userId);
 		
 		if(subscriptionsList != null && !subscriptionsList.isEmpty()) {
-			logger.debug("calling book service to get subscribed books of: {}",userId);
+			logger.info("calling book service to get subscribed books of: {}",userId);
 			List<Long> bookIds = subscriptionsList.stream().filter(Subscription::isActive).map(Subscription::getBookId).collect(Collectors.toList());
 			
 			String uri = bookServiceHost + "/book/getSubscribedBooks";

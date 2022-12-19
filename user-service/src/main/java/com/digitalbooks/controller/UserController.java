@@ -188,8 +188,8 @@ public class UserController {
 		if (ObjectUtils.isEmpty(id))
 			return ResponseEntity.badRequest().body(new MessageResponse(UserUtils.AUTHORID_INVALID));
 		
-		logger.debug(book.toString());
-		logger.debug("author id: {}",id);
+		logger.info(book.toString());
+		logger.info("author id: {}",id);
 		
 		String jwt = jwtUtils.parseJwt(request);
 		if (jwt != null && jwtUtils.validateJwtToken(jwt)) {

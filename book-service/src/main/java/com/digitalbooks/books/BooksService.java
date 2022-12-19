@@ -18,6 +18,7 @@ import org.springframework.util.ObjectUtils;
 
 import com.digitalbooks.entities.Book;
 import com.digitalbooks.repositories.BookRespository;
+import com.digitalbooks.requests.BookRequest;
 import com.digitalbooks.responses.MessageResponse;
 
 @Service
@@ -28,11 +29,12 @@ public class BooksService {
 	
 	private static final Logger logger = LoggerFactory.getLogger(BooksService.class);
 	
-	public ResponseEntity<?> saveBook(Book book, Long authorId) {
+	public ResponseEntity<?> saveBook(BookRequest bookRequest, Long authorId) {
+		Book book = generateBook(bookRequest);
 		
 		try {
 			if(Boolean.TRUE.equals(bookRespository.existsByAuthorIdAndTitle(authorId, book.getTitle()))) {
-				logger.debug("same title for author : {} exists", authorId);
+				logger.info("same title for author : {} exists", authorId);
 				return ResponseEntity.badRequest().body("Book with same title exists!");
 			}
 			book.setPublishedDate(Timestamp.valueOf(LocalDateTime.now()));
@@ -45,12 +47,7 @@ public class BooksService {
 		
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
-	
-	public List<Book> getBooks(){
-		List<Book> books = bookRespository.findAll();
-		return books;
-	}
-	
+
 	@Cacheable("book")
 	public Book getBook(Long bookId) {
 		
@@ -85,7 +82,9 @@ public class BooksService {
 		
 	}
 
-	public boolean updateBook(Book book, Long bookId, Long authorId) {
+	public boolean updateBook(BookRequest bookRequest, Long bookId, Long authorId) {
+		Book book = generateBook(bookRequest);
+		
 		if(Boolean.TRUE.equals(bookRespository.existsByAuthorIdAndId(authorId, bookId))) {
 			Book existedBook = getBook(bookId);
 			existedBook.setCategory(book.getCategory());
@@ -93,12 +92,27 @@ public class BooksService {
 			existedBook.setPrice(book.getPrice());
 			existedBook.setPublisher(book.getPublisher());
 			existedBook.setTitle(book.getTitle());
-			logger.debug("updating book: {}", bookId);
+			logger.info("updating book: {}", bookId);
 			bookRespository.save(existedBook);
 			return true;
 		}
-		logger.debug("invalid bookid: {} for author: {}", bookId, authorId);
+		logger.info("invalid bookid: {} for author: {}", bookId, authorId);
 		return false;
+	}
+
+	private Book generateBook(BookRequest bookRequest) {
+		Book book = new Book();
+		book.setActive(bookRequest.isActive());
+		book.setAuthorId(bookRequest.getAuthorId());
+		book.setAuthorName(bookRequest.getAuthorName());
+		book.setCategory(bookRequest.getCategory());
+		book.setContent(bookRequest.getContent());
+		book.setLogo(bookRequest.getLogo());
+		book.setPrice(bookRequest.getPrice());
+		book.setPublishedDate(bookRequest.getPublishedDate());
+		book.setPublisher(bookRequest.getPublisher());
+		book.setTitle(bookRequest.getTitle());
+		return book;
 	}
 
 	public MessageResponse readBook(Long bookId) {

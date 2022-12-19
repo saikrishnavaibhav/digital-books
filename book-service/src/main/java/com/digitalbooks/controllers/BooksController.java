@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.digitalbooks.books.BooksService;
 import com.digitalbooks.entities.Book;
 import com.digitalbooks.repositories.BookRespository;
+import com.digitalbooks.requests.BookRequest;
 import com.digitalbooks.responses.BookResponse;
 import com.digitalbooks.responses.MessageResponse;
 
@@ -48,11 +49,11 @@ public class BooksController {
 	 * Author can create a book
 	 */
 	@PostMapping("/author/{author-id}/createBook")
-	public ResponseEntity<?> createBook(@RequestBody Book book, @PathVariable("author-id") Long id) {
+	public ResponseEntity<?> createBook(@RequestBody BookRequest bookRequest, @PathVariable("author-id") Long id) {
 		if(id == null)
 			return ResponseEntity.badRequest().body("Invalid author Id");
-		book.setAuthorId(id);
-		return booksService.saveBook(book, id);
+		bookRequest.setAuthorId(id);
+		return booksService.saveBook(bookRequest, id);
 	}
 	
 	/*
@@ -98,15 +99,15 @@ public class BooksController {
 	 * Author can update his book
 	 */
 	@PutMapping("/author/{author-id}/updateBook/{book-id}")
-	public ResponseEntity<?> updateBook(@RequestBody Book book, @PathVariable("author-id") Long authorId, @PathVariable("book-id") Long bookId) {
+	public ResponseEntity<?> updateBook(@RequestBody BookRequest bookRequest, @PathVariable("author-id") Long authorId, @PathVariable("book-id") Long bookId) {
 		if(authorId == null)
 			return ResponseEntity.badRequest().body("Invalid author id");
 		if(bookId == null)
 			return ResponseEntity.badRequest().body(INVALID_BOOKID);
-		if(booksService.updateBook(book, bookId, authorId)) {
+		if(booksService.updateBook(bookRequest, bookId, authorId)) {
 			return ResponseEntity.ok().build();
 		}
-		logger.debug("updating book: {}",bookId);
+		logger.info("updating book: {}",bookId);
 		return ResponseEntity.badRequest().body("Book updation failed");
 	}
 
@@ -161,7 +162,7 @@ public class BooksController {
 		List<Book> booksList = new ArrayList<>();
 		if(Objects.isNull(authorId) || authorId == 0)
 			return booksList;
-		logger.debug("retrieving books of author: {}", authorId);
+		logger.info("retrieving books of author: {}", authorId);
 		booksList = booksService.getAuthorBooks(authorId);
 		return booksList;
 	}
@@ -175,7 +176,7 @@ public class BooksController {
 				bookResponse.setLogo(book1.getLogo());
 				bookResponse.setPrice(book1.getPrice());
 				bookResponse.setTitle(book1.getTitle());
-				logger.debug(bookResponse.toString());
+				logger.info(bookResponse.toString());
 				return bookResponse;
 		}).collect(Collectors.toList());
 		
