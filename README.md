@@ -52,3 +52,11 @@ worked on adding aws api gateway and front end deployment in aws
 
 17-12-2022
 worked on code optimizations, fixes and aws configurations for frontend and api gateway
+
+18-12-2022
+worked on apigateway configuration for error responses and unit test cases
+
+19-12-2022
+worked on code fixes and aws deployments
+
+App Demo Completed on 19-12-2022
